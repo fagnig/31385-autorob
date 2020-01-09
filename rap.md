@@ -48,31 +48,31 @@ Square program was modified to include logging
 This was done by having a staticly allocated array of logentry-structs that is added to once per loop-iteration.
 The array is output to "output.dat" after the ms\_end is reached 
 
-Plot made: (plot_3.1.png) / Matlab file: (matlab.m)
+Plot made: (plot_3.1.png) / Matlab file: (ex_3_1.m)
 
 ## Ex4 3.2
 Odometry implemeted by finding x, y and theta every time update\_odo is called. 
 Formulas from "Where Am I?" p.20. 
 Logging now prints the new values as well as the values from 3.1. 
 
-Plot made: (plot_3.2.png) / Matlab file: (matlab.m)
+Plot made: (plot_3.2.png) / Matlab file: (ex_3_2.m)
 
-## Ex4 3.3 
+## Ex4 3.3
 Speed limit of about 0.4~0.5 observed. 
 
-Plot made: (plot_3.3) / Matlab file: (matlab.m)
+Plot made: (plot_3.3) / Matlab file: (ex_3_3.m). 
 
 ## Ex4 3.4 
 Acceleration limit implemented, tested for 0.2, 0.4, 0.6 m/s.
 Anomaly observed, slope never ends up as steep as the original when slowly stepping up the speed. TA asked. 
 
-Plot made: (plot_3.4) / Matlab file: (matlab.m)
+Plot made: (plot_3.4) / Matlab file: (ex_3_4.m)
 
 ## Ex4 3.5
 Decceleration limit implemented tested for 0.2, 0.4, 0.6 m/s.
 Nice slowdown observed at the end of the robot movement. 
 
-Plot made: (plot_3.5) / Matlab file: (matlab.m)
+Plot made: (plot_3.5) / Matlab file: (ex_3_5.m)
 
 ## Ex4 3.6
 Both limits are now applied to turning
@@ -102,3 +102,19 @@ With "wait 1" it logs approx 100 times
 
 ## Ex5 Zoneobst with square
 Square program was changed to save laser-server data to the output file.
+
+# Day 4
+
+## Ex6 2.1
+SMRCL script was made to make 100 measurements, move forward 30cm and then make 100 more measurements.
+Matlab script that is able to generate the linear calibration transformation was written.
+First tested with simulator, then later with the actual SMR robot.
+
+Matlab script: (linesensor_converter.m)
+
+## Ex6 2.2
+SMRCL script was made to make 100 measurements, and step forward in 10cm increments and taking 100 more measurements.
+Matlab script that is able to approximate Ka & Kb from measured values and fit a function.
+Thus far only run on measurements from the simulator. 
+
+Matlab script: (irdist.m)

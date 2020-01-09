@@ -85,8 +85,6 @@ void reset_odo(odotype *p);
 void update_odo(odotype *p);
 
 
-
-
 /********************************************
   Motion control
 */
@@ -115,7 +113,11 @@ void update_motcon(motiontype *p, odotype *po);
 int fwd(double dist, double speed, int time);
 int turn(double angle, double speed, int time);
 
+static double calfacts[8]   = {0.0394,0.0340,0.0408,0.04,0.0402,0.0287,0.0115,0.0297};
+static double caloffsets[8] = {-1.9443,-1.685,-2.1994,-2.1112,-2.0748,-1.6768,-0.6277,-1.5307};
 
+double convert_linesensor_val(double in, double calval_factor, double calval_offset);
+int find_lowest_linesens_index();
 
 typedef struct {
   int state, oldstate;
@@ -133,7 +135,7 @@ odotype odo;
 smtype mission;
 motiontype mot;
 
-enum {ms_init, ms_fwd, ms_turn, ms_end};
+enum {ms_init, ms_fwd, ms_turn, ms_followline, ms_end};
 
 typedef struct {
   int mission_time;
@@ -183,6 +185,46 @@ void save_array_log() {
   }
 
   fclose(f);  
+}
+
+double clamp(double d, double min, double max) {
+  const double t = d < min ? min : d;
+  return t > max ? max : t;
+}
+
+double convert_linesensor_val(double in, double calval_factor, double calval_offset)
+{
+  return clamp(in * calval_factor + calval_offset,0.0,1.0);
+}
+
+int find_lowest_linesens_index()
+{
+  double l_val = 99999.9; // big value, since we're trying to find the smallest val
+  int l_index = 0;
+
+  for(int i = 0; i < 8; ++i){
+    double curval = convert_linesensor_val(linesensor->data[i], calfacts[i], caloffsets[i]);
+
+    if(curval < l_val){
+      l_val = curval;
+      l_index = i;
+    }
+  }
+
+  return l_index;
+}
+
+#define LINESENSOR_TRESHHOLD 60.0
+
+int can_see_line(int is_black /*unused for now*/)
+{
+  double val;
+  for(int i = 0; i < 8; ++i){
+    double curval = convert_linesensor_val(linesensor->data[i], calfacts[i], caloffsets[i]);
+    if(curval < LINESENSOR_TRESHHOLD)
+      return 1;
+  }
+  return 0;
 }
 
 int main()
@@ -444,6 +486,9 @@ void update_motcon(motiontype *p, odotype *po) {
         p->curcmd = mot_turn;
         break;
 
+      case mot_followline:
+       p->curcmd = mot_followline;
+       break;
 
     }
 
@@ -530,6 +575,12 @@ void update_motcon(motiontype *p, odotype *po) {
 	  
       break;
     }
+
+    case mot_followline:{
+
+
+      p->finished = 1;
+    }
   }
 }
 
@@ -554,6 +605,18 @@ int turn(double angle, double speed, int time) {
   }
   else
     return mot.finished;
+}
+
+int followline(double speed, int time)
+{
+  if (time == 0){
+    mot.cmd = mot_followline;
+    mot.speedcmd = speed;
+
+    return 0;
+  } else {
+    return mot.finished;
+  }
 }
 
 
