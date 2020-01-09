@@ -1,0 +1,19 @@
+% calibrate front IR sensors
+% will take 100 measurements and drive forward 10cm 6 times.
+
+fwd -0.1
+
+dist = 85
+log "dist" "$irfl" "$irfm" "$irfr"
+wait 1
+
+n=75
+label "go"
+dist = -1
+fwd 0.10
+dist = n
+wait 1
+n=n-10
+if (n>20) "go"
+
+stop
