@@ -100,6 +100,7 @@ typedef struct { //input
   double dist;
   double angle;
   int black_line;
+  int line_to_follow;
   double left_pos, right_pos;
   // parameters
   double w;
@@ -110,6 +111,8 @@ typedef struct { //input
   double startpos;
 } motiontype;
 
+enum {LINE_LEFT = 1, LINE_MIDDLE = 0, LINE_RIGHT = -1};
+
 enum {mot_stop = 1, mot_move, mot_turn, mot_followline};
 
 void update_motcon(motiontype *p, odotype *po);
@@ -118,8 +121,7 @@ void update_motcon(motiontype *p, odotype *po);
 int fwd(double dist, double speed, int time);
 int turn(double angle, double speed, int time);
 
-int followline(double dist, double speed, int time, int black_line);
-
+int followline(double dist, double speed, int time, int black_line, int line_to_follow);
 
 static double calfacts[8]   = {0.0394,0.0340,0.0408,0.04,0.0402,0.0287,0.0115,0.0297};
 static double caloffsets[8] = {-1.9443,-1.685,-2.1994,-2.1112,-2.0748,-1.6768,-0.6277,-1.5307};
@@ -431,7 +433,7 @@ int main()
         break;
         
       case ms_followline:
-        if (followline(3.0, 0.2, mission.time, 1))
+        if (followline(3.0, 0.2, mission.time, 1, LINE_MIDDLE))
           mission.state = ms_end;
         break;
 
@@ -668,7 +670,7 @@ void update_motcon(motiontype *p, odotype *po) {
       if(linesens_has_line(linesens_adj_vals, p->black_line)){
         //double line_pos = linesens_poss[linesens_find_line(linesens_adj_vals, p->black_line)];
         double line_pos = center_of_gravity(linesens_adj_vals, p->black_line);
-        double turn_delta_v = 0.01*line_pos;
+        double turn_delta_v = 0.01*line_pos + (3.5 * p->line_to_follow);
       
         if (turn_delta_v > 0) {
           p->motorspeed_l -= turn_delta_v;
@@ -705,13 +707,14 @@ int turn(double angle, double speed, int time) {
     return mot.finished;
 }
 
-int followline(double dist, double speed, int time, int black_line)
+int followline(double dist, double speed, int time, int black_line, int line_to_follow)
 {
   if (time == 0){
     mot.cmd = mot_followline;
     mot.speedcmd = speed;
     mot.dist = dist;
     mot.black_line = black_line;
+    mot.line_to_follow = line_to_follow;
 
     return 0;
   } else {
