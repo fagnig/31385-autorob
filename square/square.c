@@ -363,8 +363,8 @@ int main()
     sm_update(&mission);
     switch (mission.state) {
       case ms_init:
-        n = 4; dist = 1; angle = 90.0 / 180 * M_PI;
-        mission.state = ms_fwd;
+        n = 0; dist = 1; angle = 90.0 / 180 * M_PI;
+        mission.state = ms_turn;
         break;
 
       case ms_fwd:
@@ -539,7 +539,7 @@ void update_motcon(motiontype *p, odotype *po) {
 	  
 	  if (p->angle > 0) {
 		  if (d > 0) {
-			  p->motorspeed_r += SPEED_INCREMENT;
+			  p->motorspeed_r += 10*(goal_angle - po->theta)/*SPEED_INCREMENT*/;
 		  } else {
 			  p->motorspeed_r = 0;
 			  p->finished = 1;
@@ -548,7 +548,7 @@ void update_motcon(motiontype *p, odotype *po) {
 		  
 	  } else {
 		  if (d < 0) {
-			  p->motorspeed_l += SPEED_INCREMENT;
+			  p->motorspeed_l += 10*(goal_angle - po->theta);
 		  } else {
 			  p->motorspeed_l = 0;
 			  p->finished = 1;
