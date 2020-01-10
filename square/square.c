@@ -638,6 +638,8 @@ void update_motcon(motiontype *p, odotype *po) {
     }
 
     case mot_followline:{
+      double max_speed_inc = MAX_ACCEL * * (po->time_curr - po->time_prev);
+      
       double d = (p->right_pos + p->left_pos) / 2 - p->startpos - p->dist;
       double v_max = sqrt(2.0 * MAX_ACCEL * d);
       
@@ -654,12 +656,12 @@ void update_motcon(motiontype *p, odotype *po) {
         p->speedcmd = MIN_VELOC;
         
       if (p->motorspeed_l < p->speedcmd)
-        p->motorspeed_l += MAX_ACCEL * (po->time_curr - po->time_prev);
+        p->motorspeed_l += max_speed_inc;
       if (p->motorspeed_l > p->speedcmd)
         p->motorspeed_l = p->speedcmd;
       
       if (p->motorspeed_r < p->speedcmd)
-        p->motorspeed_r += MAX_ACCEL * (po->time_curr - po->time_prev);
+        p->motorspeed_r += max_speed_inc;
       if (p->motorspeed_r > p->speedcmd)
         p->motorspeed_r = p->speedcmd;
       
@@ -671,12 +673,18 @@ void update_motcon(motiontype *p, odotype *po) {
         //double line_pos = linesens_poss[linesens_find_line(linesens_adj_vals, p->black_line)];
         double line_pos = center_of_gravity(linesens_adj_vals, p->black_line);
         double turn_delta_v = 0.01*line_pos + (3.5 * p->line_to_follow);
+        
+        int turn_dir = turn_delta_v > 0;
+        turn_delta_v = fabs(turn_delta_v);
+        
+        if (turn_delta_v > max_speed_inc)
+          turn_delta_v = max_speed_inc;
       
-        if (turn_delta_v > 0) {
+        if (turn_dir) {
           p->motorspeed_l -= turn_delta_v;
         } else {
-          p->motorspeed_r += turn_delta_v;
-        }
+          p->motorspeed_r -= turn_delta_v;
+        }  
       }
       
       break;
