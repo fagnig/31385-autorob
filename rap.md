@@ -93,7 +93,7 @@ Worked fine both ways
 Worked as expected
 
 ## Ex5 Zoneobst
-9 zone distance values received as expected
+9 zone distance values were received as expected
 
 ## Ex5 Zoneobst with MRC
 A script was made, logging $l0-8
@@ -102,6 +102,7 @@ With "wait 1" it logs approx 100 times
 
 ## Ex5 Zoneobst with square
 Square program was changed to save laser-server data to the output file.
+Inspecting the output file, many datapoints are logged, in a format similar to the zoneobst command.
 
 # Day 4
 
@@ -110,11 +111,43 @@ SMRCL script was made to make 100 measurements, move forward 30cm and then make 
 Matlab script that is able to generate the linear calibration transformation was written.
 First tested with simulator, then later with the actual SMR robot.
 
-Matlab script: (linesensor_converter.m)
+SMRCL script: (ex_6_2_1) / Matlab script: (linesensor_converter.m)
 
 ## Ex6 2.2
 SMRCL script was made to make 100 measurements, and step forward in 10cm increments and taking 100 more measurements.
 Matlab script that is able to approximate Ka & Kb from measured values and fit a function.
 Thus far only run on measurements from the simulator. 
 
-Matlab script: (irdist.m)
+SMRCL script: (ex_6_2_2) / Matlab script: (irdist.m)
+
+# Day 5
+
+## Ex7 2
+An angular controller was implemented, first with a K value of 10, leading to a far too fast acceleration.
+The K was subsequently changed to 0.1, leading to a much smoother speed-up.
+Plotting the x and y, the x and y displacement from 0 fluctuated to a maximum of 0.1 mm over the duration.
+Plotting theta we saw a smooth increase in the angle, with curves at the beginning at the end, due to the implementation of acceleration and deceleration.
+
+## Ex7 3.1
+Very simple normalising function was implemened: val\*factor\+offset
+This normalises the sensor value based upon the calibration values
+
+## Ex7 3.2
+Simply looping through the normalised sensor values and finding the lowest value, and returning the found values index.
+This was expanded to also be able to find the highest value index, for finding a white line.
+A function to determine if there was a line at all was also implemented.
+
+## Ex7 3.3
+Implementing the simple line following algorithm using the DeltaV = K * (DeltaLs). 
+K was, through imperical testing, decided to be 0.005.
+This line following was very rough, as the lowest sensor value will regularly change between the two middle sensors when driving straight.
+
+## Ex7 3.4
+The center of gravity algorithm was implemented directly.
+x = {-7, -5 ... 5, 7}     positions of sensors on a line segment, offset from the center of the robot
+I = normalised sensor measurements
+
+## Ex7 3.5
+The output of the above function was used instead of the lookup value from the above x-table.
+K = 0.01 since the center of gravity algorithm gives a finer granularity, meaning we need to steer more aggressively.
+Robot followed line in all test cases. 
