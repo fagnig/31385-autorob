@@ -638,7 +638,7 @@ void update_motcon(motiontype *p, odotype *po) {
     }
 
     case mot_followline:{
-      double max_speed_inc = MAX_ACCEL * * (po->time_curr - po->time_prev);
+      double max_speed_inc = MAX_ACCEL * (po->time_curr - po->time_prev);
       
       double d = (p->right_pos + p->left_pos) / 2 - p->startpos - p->dist;
       double v_max = sqrt(2.0 * MAX_ACCEL * d);
