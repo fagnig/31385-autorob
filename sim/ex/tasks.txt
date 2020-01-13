@@ -1,0 +1,62 @@
+Drive
+Stop
+  After distance
+  On crossing line
+Turn
+Line following
+IR distance
+  Calibrate sideways IR sensors
+Wall following
+SMRCL course solution -> C course solution
+Reorganize C project
+
+
+
+
+Distance Measurement
+  Get to working position
+    Reach from prev task
+  Measure using IR
+  Print measurement
+
+
+Box Gate
+  Get to working position
+    Reach from prev task
+  Push box
+    Drive into it correctly
+      Follow line?
+    Stop pushing
+      Crossing line?
+  Drive through gate
+    
+
+Gate on the loose
+  Get to working position
+    Reach from prev task
+  Detect gate
+    Sideways distance sensor?
+  Drive through gate
+
+
+Wall
+  Get to working position
+    Reach from prev task
+  Maintain constant distance
+  Turn around / maintain constance distance in one go?
+  Maintan constant distance
+  Stop on line?
+
+
+White line
+  Get to working position
+    Reach from prev task
+  Find white line
+  Follow white line
+
+
+Goal
+  Get to working position
+    Reach from prev task
+  Open goal
+  Enter goal
