@@ -7,7 +7,8 @@ Line following
 IR distance
   Calibrate sideways IR sensors
 Wall following
-SMRCL course solution -> C course solution
+SMRCL course solution
+Port SMRCL solution to C
 Reorganize C project
 
 
