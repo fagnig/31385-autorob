@@ -4,30 +4,32 @@
 Robot moves approx. 1.5m forward (errors of 0.002m's) 
 
 ## Ex1 3.5.2
-Robot moves approx. in a rectangle 
+Robot moves approx. in a rectangle, with slight errors (Seems to not turn far enough)
 
 ## Ex1 3.5.3 
 Robot moves in a fluid motion. 
 
 ## Ex1 3.5.4
-Robot follows straight black line as expected 
+Robot follows straight black line as expected
 
 ## Ex1 3.5.5
 Robot follows right branch and passes the fork without a hitch. 
-Robot is slightly offset to the left, since it uses its right sensors to follow the line 
+Robot is slightly offset to the left, since it uses its right sensors to follow the line.
 
 ## Ex1 3.5.6
 Robot moves along the left branch, ignores the perpendicular black line. 
-Robot is slightly offset to the right, since it uses its left sensors to follow the line 
+Robot seems slightly offset to the right, probably since it uses its left sensors to follow the line 
 
 ## Ex1 3.5.7
-Same as above, except stopping at the perpendicular black line 
+Same as above, except the robot stops at the perpendicular black line 
 
 ## Ex1 3.5.8
 Robot follows straight line until it comes within 0.4m's of obstacle and stops. 
 
 ## Ex2 3.1
-Formulas are implemented in MatLab and give expected results 
+Formulas are implemented in MatLab and give expected results
+
+Matlab file: (robot_calibrator.m)
 
 ## Ex2 3.2
 Simulation was run, and large errors observed. 
@@ -42,11 +44,12 @@ Recalibration with the odometry-update function gave the same calibration data.
 ## Ex4 2
 Square program was run, turning around one wheel observed 
 Square program modified, robot now turns around center point
+This was achieved by averaging out the positions of the wheels, rather than using one wheel as the starting point.
 
 ## Ex4 3.1
-Square program was modified to include logging 
-This was done by having a staticly allocated array of logentry-structs that is added to once per loop-iteration.
-The array is output to "output.dat" after the ms\_end is reached 
+Square program was modified to include logging
+This was done by having a staticly allocated array of "logentry" structs that is added once per loop-iteration.
+The array is output to "output.dat" after the state ms\_end is reached 
 
 Plot made: (plot_3.1.png) / Matlab file: (ex_3_1.m)
 
@@ -55,48 +58,49 @@ Odometry implemeted by finding x, y and theta every time update\_odo is called.
 Formulas from "Where Am I?" p.20. 
 Logging now prints the new values as well as the values from 3.1. 
 
-Plot made: (plot_3.2.png) / Matlab file: (ex_3_2.m)
+Matlab file: (ex_3_2.m)
 
 ## Ex4 3.3
 Speed limit of about 0.4~0.5 observed. 
 
-Plot made: (plot_3.3) / Matlab file: (ex_3_3.m). 
+Matlab file: (ex_3_3.m). 
 
 ## Ex4 3.4 
 Acceleration limit implemented, tested for 0.2, 0.4, 0.6 m/s.
 Anomaly observed, slope never ends up as steep as the original when slowly stepping up the speed. TA asked. 
 
-Plot made: (plot_3.4) / Matlab file: (ex_3_4.m)
+Matlab file: (ex_3_4.m)
 
 ## Ex4 3.5
 Decceleration limit implemented tested for 0.2, 0.4, 0.6 m/s.
 Nice slowdown observed at the end of the robot movement. 
 
-Plot made: (plot_3.5) / Matlab file: (ex_3_5.m)
+Matlab file: (ex_3_5.m)
 
 ## Ex4 3.6
-Both limits are now applied to turning
+Both speed limits are now applied to turning
 
 ## Ex3 2.1
-Test scripts executed as expected
+Test scripts executed as expected on the robot
+Followed line with minor issues, slight wobbling.
 
 ## Ex3 2.2
 Odometry calibration succeeded after changing robots twice.
-The first two were uncalibrateable in the selected area because they got so off course they left the area.
+The first two were uncalibrateable in the selected area because they got so off-course they left the area and would have hit the walls.
 
 ## Ex3 2.3
-Worked fine both ways
+Both the clockwise and counterclockwise square runs ended up completing with errors of less than 4cm.
 
 # Day 3
 
 ## Ex5 Squareprog
-Worked as expected
+Square program completed in both turning directions, with negligible errors, as above.
 
 ## Ex5 Zoneobst
-9 zone distance values were received as expected
+Calling zoneobst output 9 zone distance values as expected
 
 ## Ex5 Zoneobst with MRC
-A script was made, logging $l0-8
+A script was made, logging $l0..8
 Without a "wait" command it logs a handful of times before stopping
 With "wait 1" it logs approx 100 times
 
