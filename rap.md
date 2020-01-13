@@ -51,7 +51,7 @@ Square program was modified to include logging
 This was done by having a staticly allocated array of "logentry" structs that is added once per loop-iteration.
 The array is output to "output.dat" after the state ms\_end is reached 
 
-Plot made: (plot_3.1.png) / Matlab file: (ex_3_1.m)
+Matlab file: (ex_3_1.m)
 
 ## Ex4 3.2
 Odometry implemeted by finding x, y and theta every time update\_odo is called. 
@@ -63,7 +63,7 @@ Matlab file: (ex_3_2.m)
 ## Ex4 3.3
 Speed limit of about 0.4~0.5 observed. 
 
-Matlab file: (ex_3_3.m). 
+Matlab file: (ex_3_3.m)
 
 ## Ex4 3.4 
 Acceleration limit implemented, tested for 0.2, 0.4, 0.6 m/s.
