@@ -1,4 +1,11 @@
-double convert_linesensor_val(double in, double calval_factor, double calval_offset)
+#include "linesensor.h"
+#include "utility.h"
+
+double convert_linesensor_val(double in, int i) {
+  return convert_linesensor_val_internal(in, calfacts[i], caloffsets[i]);
+}
+
+double convert_linesensor_val_internal(double in, double calval_factor, double calval_offset)
 {
   return clamp(in * calval_factor + calval_offset,0.0,1.0);
 }
@@ -40,7 +47,6 @@ int linesens_has_line(double * linesens_vals, int is_black){
   }
   return 0;
 }
-
 
 double center_of_gravity(double* linesens_vals, int is_black) {
   double sum_top = 0.0, sum_bot = 0.0;

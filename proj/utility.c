@@ -1,7 +1,5 @@
-
 #include <time.h>
 #include "utility.h"
-
 
 double clamp(double d, double min, double max) {
   const double t = d < min ? min : d;
@@ -12,6 +10,10 @@ double get_time() {
   struct timespec time;
   clock_gettime(CLOCK_MONOTONIC, &time);
   return (double) ( (double) time.tv_sec + (double) time.tv_nsec/1000000000);
+}
+
+void init_log() {
+  next_log_pos = 0;
 }
 
 void log_to_array(odotype *p, motiontype *mot, int mission_time, double *lin) {

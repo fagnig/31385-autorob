@@ -1,7 +1,9 @@
-
-
 #ifndef __UTILITY_HEADER__
 #define __UTILITY_HEADER__
+
+#include <stdio.h>
+
+#include "types.h"
 
 typedef struct {
   double time;
@@ -11,14 +13,13 @@ typedef struct {
   double l[10];
 } logentry;
 
-double time_start = 0;
 logentry log_arr[10000000];
-int next_log_pos = 0;
+int next_log_pos;
+
+void init_log();
 
 double clamp(double d, double min, double max);
 double get_time();
-
-
 
 //Logging
 void log_to_array(odotype *p, motiontype *mot, int mission_time, double *lin);
