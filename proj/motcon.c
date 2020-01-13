@@ -27,6 +27,7 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
 
       case mot_followline:
        p->startpos = (p->left_pos + p->right_pos) / 2;
+       p->angle = po->theta;
        p->curcmd = mot_followline;
        break;
 
@@ -147,25 +148,43 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       double linesens_adj_vals[8];
       for(int i = 0; i < 8; ++i){
         linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i);
+        //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
       }
       if(linesens_has_line(linesens_adj_vals, p->black_line)){
         //double line_pos = linesens_poss[linesens_find_line(linesens_adj_vals, p->black_line)];
         double line_pos = center_of_gravity(linesens_adj_vals, p->black_line);
-        double turn_delta_v = 0.01*line_pos + (3.5 * p->line_to_follow);
+        double turn_delta_v = 0.02*(line_pos + (3.5 * p->line_to_follow));
+        //printf("TRYING TO TURN WITH DV: %f\n", turn_delta_v);
         
-        int turn_dir = turn_delta_v > 0;
-        turn_delta_v = fabs(turn_delta_v);
         
-        if (turn_delta_v > max_speed_inc)
-          turn_delta_v = max_speed_inc;
+        double goal_angle = p->angle + turn_delta_v;
+
+        d = (p->w / 2) * (goal_angle - po->theta);
+        //v_max = sqrt(2.0 * MAX_ACCEL * fabs(d));
       
-        if (turn_dir) {
-          p->motorspeed_l -= turn_delta_v;
+        // can't go faster than v_max or speedcmd (whichever is smaller)
+        // can't accelerate faster than 0.5m/s
+        // can't decelerate (based on not going faster than v_max)
+        // negative angle, (positive speed on left wheel)
+      
+       if(turn_delta_v < 0) {
+          if (d > 0) {
+            p->motorspeed_r += 0.1*(goal_angle - po->theta)/*SPEED_INCREMENT*/;
+          } else {
+            p->motorspeed_r = 0;
+            p->finished = 1;
+          }
+          p->motorspeed_l = -p->motorspeed_r;
         } else {
-          p->motorspeed_r -= turn_delta_v;
-        }  
+          if (d < 0) {
+            p->motorspeed_l += 0.1*(goal_angle - po->theta);
+          } else {
+            p->motorspeed_l = 0;
+            p->finished = 1;
+          }
+          p->motorspeed_r = -p->motorspeed_l;
+        }
       }
-      
       break;
     }
   }
@@ -201,7 +220,7 @@ int followline(motiontype *mot, double dist, double speed, int time, int black_l
     mot->dist = dist;
     mot->black_line = black_line;
     mot->line_to_follow = line_to_follow;
-
+    
     return 0;
   } else {
     return mot->finished;
