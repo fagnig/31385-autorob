@@ -1,3 +1,11 @@
+### 31385 - Autonomous Robots
+### Team 20
+### s175210 - Peter Tønder Blendstrup
+### s191731 - Jeremy Paul Coffelt
+### s175179 - Joachim Schøndorff Mortensen
+
+Graphs and matlab files found at <https://github.com/fagnig/31385-autorob/tree/master/sim/ex>
+
 # Day 1
 
 ## Ex1 3.5.1
