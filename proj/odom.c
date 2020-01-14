@@ -10,7 +10,8 @@ void reset_odo(odotype * p)
   p->right_enc_old = p->right_enc;
   p->left_enc_old = p->left_enc;
   p->x = p->y = p->theta = 0.0;
-  p->time_start = p->time_prev = p->time_curr = get_time();
+  p->time_start = p->time_prev = p->time_curr = p->time_last_cross = get_time();
+  p->num_crossed = 0;
 }
 
 void update_odo(odotype *p)

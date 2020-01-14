@@ -82,7 +82,7 @@ int main()
 
   /* Establish connection to robot sensors and actuators.
   */
-  if (rhdConnect('w', "localhost", ROBOTPORT) != 'w') {
+  if (rhdConnect('w', "localhost", SIMULPORT) != 'w') {
     printf("Can't connect to rhd \n");
     exit(EXIT_FAILURE);
   }
@@ -234,7 +234,7 @@ int main()
       
       case ms_followline: {
         //printf("Linesensorvals: %d %d %d %d %d %d %d %d", linesensor->data[0], linesensor->data[1], linesensor->data[2], linesensor->data[3], linesensor->data[4], linesensor->data[5], linesensor->data[6],  linesensor->data[7]);
-        if (followline(&mot, 2.0, 0.2, mission.time, 1, LINE_MIDDLE))
+        if (followline(&mot, 6.0, 0.35, mission.time, 1, LINE_MIDDLE))
           mission.state = ms_end;
         break;
       }

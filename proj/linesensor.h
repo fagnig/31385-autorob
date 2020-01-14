@@ -6,6 +6,10 @@
 #define BLACK_THRESHOLD 0.2
 #define WHITE_THRESHOLD 0.8
 
+#define MIN_LINES_FOR_CROSS 6
+
+#include "types.h"
+
 static double calfacts[8]   = {0.0394,0.0340,0.0408,0.04,0.0402,0.0287,0.0115,0.0297};
 static double caloffsets[8] = {-1.9443,-1.685,-2.1994,-2.1112,-2.0748,-1.6768,-0.6277,-1.5307};
 static double linesens_poss[8] = {-7.0, -5.0, -3.0, -1.0, 1.0, 3.0, 5.0, 7.0};
@@ -22,7 +26,10 @@ int linesens_find_highest(double * linesens_vals);
 int linesens_find_line(double * linesens_vals, int is_black);
 
 int linesens_has_line(double * linesens_vals, int is_black);
+int linesens_has_cross(double * linesens_vals, int is_black);
 
+int grav_lines(double *line_adj_vals, grav_line *out, int is_black);
 double center_of_gravity(double* linesens_vals, int is_black);
+double center_of_gravity_line(double* linesens_vals, int is_black, int from, int to);
 
 #endif

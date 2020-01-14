@@ -18,8 +18,12 @@ typedef struct {
   double time_start;
   double time_prev;
   double time_curr;
+  double time_last_cross;
+  int num_crossed;
   // internal variables
   int left_enc_old, right_enc_old;
+  double i_sum;
+  double angle_prev;
 } odotype;
 
 
@@ -47,5 +51,10 @@ typedef struct {
   int state, oldstate;
   int time;
 } smtype;
+
+typedef struct {
+  int first_sens;
+  int last_sens;
+} grav_line;
 
 #endif

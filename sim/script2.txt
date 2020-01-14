@@ -1,0 +1,9 @@
+radius = 0
+loopsPerMeter = 10
+
+label "loopTop"
+	radius = radius + 0.5/loopsPerMeter
+	angle = 360/loopsPerMeter
+	ignoreobstacles
+	turnr radius angle
+goto "loopTop"

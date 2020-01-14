@@ -150,42 +150,67 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i);
         //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
       }
-      if(linesens_has_line(linesens_adj_vals, p->black_line)){
-        //double line_pos = linesens_poss[linesens_find_line(linesens_adj_vals, p->black_line)];
-        double line_pos = center_of_gravity(linesens_adj_vals, p->black_line);
-        double turn_delta_v = 0.02*(line_pos + (3.5 * p->line_to_follow));
+      grav_line lines[4];
+      int numlines = grav_lines(linesens_adj_vals, lines, p->black_line);
+      
+      if(numlines > 0){
+        int selected = 0;
+        
+        switch (p->line_to_follow) {
+          case LINE_LEFT: {
+            selected = numlines-1;
+            break;
+          }
+          case LINE_MIDDLE: {
+            // determine which line is most in the middle (avg sensor closest to middle sensor)
+            int bestval = 9;
+            for (int i = 0; i < numlines; i++) {
+              int val = abs((lines[i].first_sens + lines[i].last_sens)-7);
+              if (val < bestval) {
+                bestval = val;
+                selected = i;
+              }
+            }
+            break;
+          }
+          case LINE_RIGHT: {
+            selected = 0;
+            break;
+          }
+        }
+        
+        if (po->time_curr - po->time_last_cross > 0.5) {
+          for (int i = 0; i < numlines; i++) {
+            if ((lines[i].last_sens - lines[i].first_sens) > 4) {
+              po->time_last_cross = po->time_curr;
+              po->num_crossed++;
+              printf("line crossed %d\n", po->num_crossed);
+            }
+          }
+        }
+        
+        // for (int i = 0; i < numlines; i++) {
+          // printf("line %d: start: %d, end: %d", i, lines[i].first_sens, lines[i].last_sens);
+        // }
+        // printf("selected line: %d\n", selected);
+        
+        //double line_pos = center_of_gravity(linesens_adj_vals, p->black_line) - 4.0*p->line_to_follow;
+        double line_pos = center_of_gravity_line(linesens_adj_vals, p->black_line, lines[selected].first_sens, lines[selected].last_sens);
+        
+        double turn_angle = atan((line_pos/100.0)/DIST_LINESENSOR_FROM_CENTER);
+        // printf("Line_pos: %f, turn_angle: %f\n", line_pos, turn_angle);
+        double goal_angle = po->theta + turn_angle;
+
+        double turn_delta = pid_angle(po, goal_angle);
         //printf("TRYING TO TURN WITH DV: %f\n", turn_delta_v);
         
-        
-        double goal_angle = p->angle + turn_delta_v;
-
-        d = (p->w / 2) * (goal_angle - po->theta);
+        //d = (p->w / 2) * (turn_delta);
         //v_max = sqrt(2.0 * MAX_ACCEL * fabs(d));
-      
-        // can't go faster than v_max or speedcmd (whichever is smaller)
-        // can't accelerate faster than 0.5m/s
-        // can't decelerate (based on not going faster than v_max)
-        // negative angle, (positive speed on left wheel)
-      
-       if(turn_delta_v < 0) {
-          if (d > 0) {
-            p->motorspeed_r += 0.1*(goal_angle - po->theta)/*SPEED_INCREMENT*/;
-          } else {
-            p->motorspeed_r = 0;
-            p->finished = 1;
-          }
-          p->motorspeed_l = -p->motorspeed_r;
-        } else {
-          if (d < 0) {
-            p->motorspeed_l += 0.1*(goal_angle - po->theta);
-          } else {
-            p->motorspeed_l = 0;
-            p->finished = 1;
-          }
-          p->motorspeed_r = -p->motorspeed_l;
-        }
+        
+        p->motorspeed_r -= turn_delta;
+        p->motorspeed_l += turn_delta;
+        break;
       }
-      break;
     }
   }
 }
@@ -225,4 +250,20 @@ int followline(motiontype *mot, double dist, double speed, int time, int black_l
   } else {
     return mot->finished;
   }
+}
+
+double pid_angle(odotype *odo, double target) {
+  double p, i, d;
+  
+  // Proportional
+  p = odo->theta - target;
+  
+  // Integral
+  i = odo->i_sum += p; // can put a clamp on this
+  
+  // Derivative
+  d = (odo->theta - odo->angle_prev) / (odo->time_curr - odo->time_prev);
+  // update_odo saves time_curr and time_prev
+  
+  return PID_ANGLE_KP*p + PID_ANGLE_KI*i + PID_ANGLE_KD*d;
 }

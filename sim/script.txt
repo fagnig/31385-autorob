@@ -1,0 +1,88 @@
+% Initialize key parameters and variables
+
+	wheelBase = 0.26
+	stopDistFromObjects = 0.25
+	distToMoveBox = 0.50
+	isTurning = 0
+	lineEdge = 0	% -1 = Left, 0 = Middle, 1 = Right
+
+	% log "isTurning" "lineEdge" "$lineraw0" "$lineraw1" "$lineraw3" "$lineraw4" "$lineraw6" "$lineraw7"
+
+% Drive from start to first box, start logs, and take required measurement
+
+	lineEdge = -1
+	followline "bl" : ($irdistfrontmiddle < stopDistFromObjects)
+	stop
+
+	isMeasuringFirstObject = 1
+	totalDistanceFromFirstOjbect = $odoy + wheelBase/2 + stopDistFromObjects
+	log "$blacklinefound" "$linepos" "isMeasuringFirstObject" "totalDistanceFromFirstOjbect" "$irdistright"
+	wait 1
+
+	isMeasuringFirstObject = 0
+	totalDistanceFromFirstOjbect = 0
+
+% Retreat to point before first branch, spin, and follow next branch
+
+	isTurning = 1
+	turn 180
+	isTurning = 0
+
+	lineEdge = 1
+	followline "br" : ($drivendist > 1.2) % todo: fix magic number?
+
+	isTurning = 1
+	turn 180
+	isTurning = 0
+
+	followline "br" : ($drivendist > 2.5) % todo: fix magic number?
+
+% Drive to boxed gate and push box
+
+	lineEdge = 0
+	followline "bm" : ($irdistfrontmiddle < stopDistFromObjects)
+	stop
+
+	ignoreobstacles
+	followline "bm" : ($drivendist > stopDistFromObjects + distToMoveBox)
+	stop
+
+% Back up, turn, and drive through boxed gate
+
+	fwd -1 % todo: fix magic number?
+
+	isTurning = 1
+	turn 90
+	isTurning = 0
+
+	ignoreobstacles
+	isTurning = 1
+	turnr 0.5 -180
+	isTurning = 0
+
+	ignoreobstacles
+	lineEdge = -1
+	followline "bl" : ($drivendist > 1)
+
+% Find "loose" gate, turn towards it, and drive through
+
+	lineEdge = 0
+	followline "bm" : ($irdistright < 0.75)  % todo: fix magic number?
+	x1 = $ododist
+	stop
+ 
+	followline "bm" : ($irdistright > 0.75) % todo: fix magic number?
+	x2 = $ododist
+	stop
+
+	dist = -(x2 - x1)/2
+	fwd dist
+	stop
+
+	isTurning = 1
+	turn -90
+	isTurning = 0
+
+	ignoreobstacles
+	fwd 1.5  % todo: fix magic number?
+	stop
