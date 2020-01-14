@@ -2,12 +2,12 @@
 #include "utility.h"
 
 double convert_linesensor_val(double in, int i) {
-  return convert_linesensor_val_internal(in, calfacts[i], caloffsets[i]);
+  return convert_linesensor_val_internal(in, black_val[i], white_val[i]);
 }
 
-double convert_linesensor_val_internal(double in, double calval_factor, double calval_offset)
+double convert_linesensor_val_internal(double in, double black_val, double white_val)
 {
-  return clamp(in * calval_factor + calval_offset,0.0,1.0);
+  return clamp((in - black_val) / (white_val - black_val),0.0,1.0);
 }
 
 int linesens_find_lowest(double * linesens_vals) {
@@ -53,7 +53,7 @@ double center_of_gravity(double* linesens_vals, int is_black) {
   
   if (is_black) {
     for (int i = 0; i < NUM_LINESENSORS; i++) {
-      sum_top += linesens_poss[i] * (1 - linesens_vals[i]);
+      sum_top += linesens_poss[i] * (1.0 - linesens_vals[i]);
       sum_bot += linesens_vals[i];
     }
   } else {
