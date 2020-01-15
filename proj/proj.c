@@ -27,7 +27,7 @@
 #include "linesensor.h"
 
 // EDIT THIS TO CHANGE PROGRAM
-#define CONF_TO_RUN conf_findgate
+#define CONF_TO_RUN conf_squarecw
 
 #define ROBOTPORT 24902
 #define SIMULPORT 8000
@@ -97,7 +97,7 @@ int main()
 
   /* Establish connection to robot sensors and actuators.
   */
-  if (rhdConnect('w', "localhost", SIMULPORT) != 'w') {
+  if (rhdConnect('w', "localhost", ROBOTPORT) != 'w') {
     printf("Can't connect to rhd \n");
     exit(EXIT_FAILURE);
   }
@@ -189,9 +189,9 @@ int main()
   */
   rhdSync();
 
-  odo.w = 0.256;
-  odo.cr = DELTA_M;
-  odo.cl = odo.cr;
+  odo.w = WHEEL_SEPARATION;
+  odo.cr = WHEEL_CR;
+  odo.cl = WHEEL_CL;
   odo.left_enc = lenc->data[0];
   odo.right_enc = renc->data[0];
   reset_odo(&odo);
@@ -325,7 +325,6 @@ int main()
 
 void sm_update(smtype *p) {
   if (p->state != p->oldstate) {
-    printf("changed state from %d to % d\n", p->oldstate, p->state);
     p->time = 0;
     p->oldstate = p->state;
   }

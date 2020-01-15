@@ -83,7 +83,7 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       
       if (p->angle > 0) {
           if (d > 0) {
-              p->motorspeed_r += 0.1*(goal_angle - po->theta);
+              p->motorspeed_r += fabs(0.1*(goal_angle - po->theta));
           } else {
               p->motorspeed_r = 0;
               p->finished = 1;
@@ -92,7 +92,7 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
           
       } else {
           if (d < 0) {
-              p->motorspeed_l += 0.1*(goal_angle - po->theta);
+              p->motorspeed_l += fabs(0.1*(goal_angle - po->theta));
           } else {
               p->motorspeed_l = 0;
               p->finished = 1;

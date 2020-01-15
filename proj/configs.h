@@ -5,6 +5,8 @@
 
 #include <math.h>
 
+#define SQUARE_L 3.0
+
 typedef struct {
   motiontype* mot;
   odotype* odo;
@@ -21,15 +23,33 @@ typedef struct {
   int (*p_stop)(PredicateData);
 } StateParam;
 
-StateParam conf_square[] = {
-  { .state = ms_fwd, .speed = 0.3, .dist = 2.0 },
+StateParam conf_squareccw[] = {
+  { .state = ms_fwd, .speed = 0.3, .dist = SQUARE_L },
   { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI },
-  { .state = ms_fwd, .speed = 0.3, .dist = 2.0 },
+  { .state = ms_fwd, .speed = 0.3, .dist = SQUARE_L },
   { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI },
-  { .state = ms_fwd, .speed = 0.3, .dist = 2.0 },
+  { .state = ms_fwd, .speed = 0.3, .dist = SQUARE_L },
   { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI },
-  { .state = ms_fwd, .speed = 0.3, .dist = 2.0 },
+  { .state = ms_fwd, .speed = 0.3, .dist = SQUARE_L },
   { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI }
+};
+
+StateParam conf_squarecw[] = {
+  { .state = ms_fwd, .speed = 0.4, .dist = SQUARE_L },
+  { .state = ms_turn, .speed = 0.2, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_fwd, .speed = 0.4, .dist = SQUARE_L },
+  { .state = ms_turn, .speed = 0.2, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_fwd, .speed = 0.4, .dist = SQUARE_L },
+  { .state = ms_turn, .speed = 0.2, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_fwd, .speed = 0.4, .dist = SQUARE_L },
+  { .state = ms_turn, .speed = 0.2, .angle = -90.0 / 180.0 * M_PI }
+};
+
+StateParam conf_turntest[] = {
+  { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI },
+  { .state = ms_turn, .speed = 0.3, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_turn, .speed = -0.3, .angle = 90.0 / 180.0 * M_PI },
+  { .state = ms_turn, .speed = -0.3, .angle = -90.0 / 180.0 * M_PI }
 };
 
 StateParam conf_followbm[] = {
