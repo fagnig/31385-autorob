@@ -151,7 +151,7 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       double linesens_adj_vals[8];
       for(int i = 0; i < 8; ++i){
         linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i);
-        //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
+        printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
       }
       grav_line lines[4];
       int numlines = grav_lines(linesens_adj_vals, lines, p->black_line);

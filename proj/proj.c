@@ -27,7 +27,7 @@
 #include "linesensor.h"
 
 // EDIT THIS TO CHANGE PROGRAM
-#define CONF_TO_RUN conf_squarecw
+#define CONF_TO_RUN conf_followbm
 
 #define ROBOTPORT 24902
 #define SIMULPORT 8000
