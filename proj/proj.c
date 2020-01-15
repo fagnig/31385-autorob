@@ -19,17 +19,28 @@
 #include "xmlio.h"
 
 #include "proj.h"
+#include "configs.h"
+#include "types.h"
 #include "utility.h"
 #include "motcon.h"
 #include "odom.h"
 #include "linesensor.h"
+
+// EDIT THIS TO CHANGE PROGRAM
+#define CONF_TO_RUN conf_stoponcross
+
+#define ROBOTPORT 24902
+#define SIMULPORT 8000
+
+/////////////////////////////////////////////
+// Robot data connection
+/////////////////////////////////////////////
 
 struct xml_in *xmldata;
 struct xml_in *xmllaser;
 struct {
   double x, y, z, omega, phi, kappa, code, id, crc;
 } gmk;
-
 
 double visionpar[10];
 double laserpar[10];
@@ -58,27 +69,31 @@ symTableElement * getoutputref (const char *sym_name, symTableElement *tab)
   return 0;
 }
 
-#define ROBOTPORT 24902
-#define SIMULPORT 8000
-
 // SMR input/output data
 
 symTableElement *  inputtable, *outputtable;
 symTableElement *lenc, *renc, *linesensor, *irsensor, *speedl, *speedr, *resetmotorr, *resetmotorl;
 
+/////////////////////////////////////////////
+// Main
+/////////////////////////////////////////////
 odotype odo;
 smtype mission;
 motiontype mot;
-
-enum {ms_init, ms_fwd, ms_turn, ms_followline, ms_end};
-
 
 int main()
 {
   init_log();
   
-  int running, n = 0, arg, time = 0;
-  double dist = 0, angle = 0;
+  /////////////////////////////////////////////
+  // Program driver
+  /////////////////////////////////////////////
+  StateParam *config = CONF_TO_RUN;
+  int config_len = sizeof(CONF_TO_RUN) / sizeof(StateParam);
+  int nextparam = 0;
+  // printf("%d %p\n", config_len, (void*) config);
+  
+  int running, arg;
 
   /* Establish connection to robot sensors and actuators.
   */
@@ -185,6 +200,10 @@ int main()
   running = 1;
   mission.state = ms_init;
   mission.oldstate = -1;
+  
+  // Predicate data
+  PredicateData pred_data = { .mot=&mot, .odo=&odo, .laserpar=laserpar};
+  
   while (running) {
     if (lmssrv.config && lmssrv.status && lmssrv.connected) {
       while ( (xml_in_fd(xmllaser, lmssrv.sockfd) > 0))
@@ -201,6 +220,11 @@ int main()
     odo.left_enc = lenc->data[0];
     odo.right_enc = renc->data[0];
     update_odo(&odo);
+    
+    for(int i = 0; i<5; i++){
+      printf("%d ", irsensor->data[i]);
+    }
+    puts("\n");
 
     /****************************************
       / mission statemachine
@@ -208,34 +232,48 @@ int main()
     
     log_to_array(&odo, &mot, mission.time, laserpar);
     
+    // Skip/finish command when predicate is true.
+    if(nextparam < config_len && config[nextparam].p_stop && config[nextparam].p_stop(pred_data)) {
+      nextparam++;
+      // printf("stop predicate was true, skipped to param %d\n", nextparam);
+    }
+    
+    // No more commands
+    if (nextparam >= config_len) {
+      mission.state = ms_end;
+    }
+    
     sm_update(&mission);
     switch (mission.state) {
       case ms_init: {
-        n = 0; dist = 0.9; angle = 35.0 / 180 * M_PI;
-        mission.state = ms_followline;
+        printf("started program with {%d} commands\n", config_len);
+        mission.state = config[nextparam].state;
+        break;
+      }
+      
+      case ms_nextstate: {
+        mission.state = config[++nextparam].state;
         break;
       }
       
       case ms_fwd: {
-        if (fwd(&mot, dist, 0.3, mission.time))  mission.state = ms_turn;
+        if (fwd(&mot, config[nextparam].dist, config[nextparam].speed, mission.time)) {
+          mission.state = ms_nextstate;
+        }
         break;
       }
       
       case ms_turn: {
-        if (turn(&mot, angle, 0.6, mission.time)) {
-          n = n - 1;
-          if (n <= 0)
-            mission.state = ms_followline;
-          else
-            mission.state = ms_fwd;
+        if (turn(&mot, config[nextparam].angle, config[nextparam].speed, mission.time)) {
+          mission.state = ms_nextstate;
         }
         break;
       }
       
       case ms_followline: {
-        //printf("Linesensorvals: %d %d %d %d %d %d %d %d", linesensor->data[0], linesensor->data[1], linesensor->data[2], linesensor->data[3], linesensor->data[4], linesensor->data[5], linesensor->data[6],  linesensor->data[7]);
-        if (followline(&mot, 6.0, 0.35, mission.time, 1, LINE_MIDDLE))
-          mission.state = ms_end;
+        if (followline(&mot, config[nextparam].dist, config[nextparam].speed, mission.time, config[nextparam].is_black, config[nextparam].line_to_follow)) {
+          mission.state = ms_nextstate;
+        }
         break;
       }
       
@@ -247,7 +285,10 @@ int main()
       
       default: {
         printf("[ERROR] Invalid state entered: {%d} ", mission.state);
+        StateParam sp = config[nextparam];
+        printf("%d %f %f %f %d %d\n", sp.state, sp.speed, sp.dist, sp.angle, sp.is_black, sp.line_to_follow);
         mission.state = ms_end;
+        break;
       }
       
     }
@@ -261,12 +302,8 @@ int main()
     speedl->updated = 1;
     speedr->data[0] = 100 * mot.motorspeed_r;
     speedr->updated = 1;
-    if (time  % 100 == 0)
-      //    printf(" laser %f \n",laserpar[3]);
-      time++;
-    /* stop if keyboard is activated
-
-    */
+      
+    // stop if keyboard is activated
     ioctl(0, FIONREAD, &arg);
     if (arg != 0)  running = 0;
 

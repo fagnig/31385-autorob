@@ -2,9 +2,16 @@
 #define __TYPES_HEADER__
 
 /////////////////////////////////////////////
-// Structs
+// Enums
 /////////////////////////////////////////////
 
+enum {ms_init, ms_nextstate, ms_fwd, ms_turn, ms_followline, ms_end};
+enum {LINE_LEFT = -1, LINE_MIDDLE = 0, LINE_RIGHT = 1};
+enum {mot_stop = 1, mot_move, mot_turn, mot_followline};
+
+/////////////////////////////////////////////
+// Structs
+/////////////////////////////////////////////
 
 typedef struct { 
   //input signals
@@ -18,8 +25,7 @@ typedef struct {
   double time_start;
   double time_prev;
   double time_curr;
-  double time_last_cross;
-  int num_crossed;
+  int crossing_line;
   // internal variables
   int left_enc_old, right_enc_old;
   double i_sum;

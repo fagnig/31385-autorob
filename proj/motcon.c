@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <math.h>
 
 #include "motcon.h"
@@ -42,6 +43,8 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       p->motorspeed_r = 0;
       break;
     case mot_move:{
+      double max_speed_inc = MAX_ACCEL * (po->time_curr - po->time_prev);
+      
       double d = (p->right_pos + p->left_pos) / 2 - p->startpos - p->dist;
       double v_max = sqrt(2.0 * MAX_ACCEL * d);
       
@@ -57,12 +60,12 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
             p->speedcmd = MIN_VELOC;
           
         if (p->motorspeed_l < p->speedcmd)
-            p->motorspeed_l += SPEED_INCREMENT;
+            p->motorspeed_l += max_speed_inc;
         if (p->motorspeed_l > p->speedcmd)
             p->motorspeed_l = p->speedcmd;
         
         if (p->motorspeed_r < p->speedcmd)
-            p->motorspeed_r += SPEED_INCREMENT;
+            p->motorspeed_r += max_speed_inc;
         if (p->motorspeed_r > p->speedcmd)
             p->motorspeed_r = p->speedcmd;
       }
@@ -80,7 +83,7 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       
       if (p->angle > 0) {
           if (d > 0) {
-              p->motorspeed_r += 0.1*(goal_angle - po->theta)/*SPEED_INCREMENT*/;
+              p->motorspeed_r += 0.1*(goal_angle - po->theta);
           } else {
               p->motorspeed_r = 0;
               p->finished = 1;
@@ -179,13 +182,10 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
           }
         }
         
-        if (po->time_curr - po->time_last_cross > 0.5) {
-          for (int i = 0; i < numlines; i++) {
-            if ((lines[i].last_sens - lines[i].first_sens) > 4) {
-              po->time_last_cross = po->time_curr;
-              po->num_crossed++;
-              printf("line crossed %d\n", po->num_crossed);
-            }
+        po->crossing_line = 0;
+        for (int i = 0; i < numlines; i++) {
+          if ((lines[i].last_sens - lines[i].first_sens) > 5) {
+            po->crossing_line = 1;
           }
         }
         

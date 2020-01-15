@@ -1,15 +1,16 @@
-Drive
+Drive *
 Stop
-  After distance
-  On crossing line
-Turn
-Line following
+  After distance *
+  On crossing line *
+  IR detection
+Turn *
+Line following *
 IR distance
   Calibrate sideways IR sensors
-Wall following
+  Wall following
 SMRCL course solution
 Port SMRCL solution to C
-Reorganize C project
+Reorganize C project *
 
 
 
