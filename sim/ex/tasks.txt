@@ -1,15 +1,19 @@
-Drive *
-Stop
-  After distance *
-  On crossing line *
-  IR detection
-Turn *
-Line following *
-IR distance
-  Calibrate sideways IR sensors
-  Wall following
-SMRCL course solution
-Port SMRCL solution to C
+Implement SMRCL-like commands in C *
+  Drive *
+  Stop
+    After distance *
+    On crossing line *
+    IR detection -
+    Laser detection *
+  Turn *
+  Line following *
+IR distance -
+  Calibrate sideways IR sensors -
+  Wall following -
+Laser Distance *
+  Wall following *
+SMRCL course solution 
+Port SMRCL solution to C 
 Reorganize C project *
 
 

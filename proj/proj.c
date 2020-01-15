@@ -27,7 +27,7 @@
 #include "linesensor.h"
 
 // EDIT THIS TO CHANGE PROGRAM
-#define CONF_TO_RUN conf_stoponcross
+#define CONF_TO_RUN conf_findgate
 
 #define ROBOTPORT 24902
 #define SIMULPORT 8000
@@ -221,10 +221,14 @@ int main()
     odo.right_enc = renc->data[0];
     update_odo(&odo);
     
-    for(int i = 0; i<5; i++){
-      printf("%d ", irsensor->data[i]);
-    }
-    puts("\n");
+    // for(int i = 0; i<5; i++){
+      // printf("%d ", irsensor->data[i]);
+    // }
+    // puts("\n");
+    // for (int i = 0; i < 10; i++) {
+      // printf("las=%d val=%f, ", i, laserpar[i]);
+    // }
+    // puts("\n");
 
     /****************************************
       / mission statemachine
@@ -232,9 +236,11 @@ int main()
     
     log_to_array(&odo, &mot, mission.time, laserpar);
     
+    
+    
     // Skip/finish command when predicate is true.
     if(nextparam < config_len && config[nextparam].p_stop && config[nextparam].p_stop(pred_data)) {
-      nextparam++;
+      mission.state = ms_nextstate;
       // printf("stop predicate was true, skipped to param %d\n", nextparam);
     }
     
@@ -319,6 +325,7 @@ int main()
 
 void sm_update(smtype *p) {
   if (p->state != p->oldstate) {
+    printf("changed state from %d to % d\n", p->oldstate, p->state);
     p->time = 0;
     p->oldstate = p->state;
   }
