@@ -414,8 +414,8 @@ int main()
     sm_update(&mission);
     switch (mission.state) {
       case ms_init:
-        n = 0; dist = 0.9; angle = 35.0 / 180 * M_PI;
-        mission.state = ms_followline;
+        n = 4; dist = 0.9; angle = 35.0 / 180 * M_PI;
+        mission.state = ms_fwd;
         break;
 
       case ms_fwd:
@@ -425,8 +425,8 @@ int main()
       case ms_turn:
         if (turn(angle, 0.6, mission.time)) {
           n = n - 1;
-          if (n <= 0)
-            mission.state = ms_followline;
+          if (n < 0)
+            mission.state = ms_end;
           else
             mission.state = ms_fwd;
         }
