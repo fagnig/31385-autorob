@@ -3,14 +3,14 @@
 
 #define NUM_LINESENSORS 8
 
-#define BLACK_THRESHOLD 0.15
-#define WHITE_THRESHOLD 0.85
+#define BLACK_THRESHOLD 0.2
+#define WHITE_THRESHOLD 0.8
 
 #define MIN_LINES_FOR_CROSS 6
 
 #include "types.h"
 
-double convert_linesensor_val(double in, int i);
+double convert_linesensor_val(double in, int i, int is_black);
 double convert_linesensor_val_internal(double in, double calval_factor, double calval_offset);
 
 int linesens_find_lowest(double * linesens_vals);

@@ -53,7 +53,7 @@ StateParam conf_turntest[] = {
 };
 
 StateParam conf_followbm[] = {
-  { .state = ms_followline, .speed = 0.3, .dist = 3.5, .is_black = 1, .line_to_follow = LINE_MIDDLE }
+  { .state = ms_followline, .speed = 0.30, .dist = 2.5, .is_black = 1, .line_to_follow = LINE_MIDDLE }
 };
 
 int p_stoponcross(PredicateData dat) {
@@ -86,6 +86,14 @@ StateParam conf_findgate[] = {
   { .state = ms_fwd, .speed = 0.3, .dist = 0.5 },
   { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI },
   { .state = ms_fwd, .speed = 0.3, .dist = 1.0 }
+};
+
+int p_time(PredicateData dat) {
+  return (dat.odo->time_curr - dat.odo->time_start > 2.0);
+}
+StateParam conf_calib[] = {
+    { .state = ms_followline, .speed = 0.3, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+    .p_stop = &p_time},
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "utility.h"
 #include "motcon.h"
 
 void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
@@ -149,8 +150,8 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       
       double linesens_adj_vals[8];
       for(int i = 0; i < 8; ++i){
-        linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i);
-        // printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
+        linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i, p->black_line);
+        //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
       }
       grav_line lines[4];
       int numlines = grav_lines(linesens_adj_vals, lines, p->black_line);
@@ -183,6 +184,8 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         
         po->crossing_line = 0;
         for (int i = 0; i < numlines; i++) {
+          //printf("a: %d, b: %d", lines[i].first_sens, lines[i].last_sens);
+
           if ((lines[i].last_sens - lines[i].first_sens) > 5) {
             po->crossing_line = 1;
           }
@@ -194,8 +197,9 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         // printf("selected line: %d\n", selected);
         
         //double line_pos = center_of_gravity(linesens_adj_vals, p->black_line) - 4.0*p->line_to_follow;
-        double line_pos = center_of_gravity_line(linesens_adj_vals, p->black_line, lines[selected].first_sens, lines[selected].last_sens);
-        
+        double line_pos = 0.0;
+        line_pos = center_of_gravity_line(linesens_adj_vals, p->black_line, lines[selected].first_sens, lines[selected].last_sens);
+        //printf("val: %f\n", line_pos);
         double turn_angle = atan((line_pos/100.0)/DIST_LINESENSOR_FROM_CENTER);
         // printf("Line_pos: %f, turn_angle: %f\n", line_pos, turn_angle);
         double goal_angle = po->theta + turn_angle;
@@ -205,7 +209,11 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         
         //d = (p->w / 2) * (turn_delta);
         //v_max = sqrt(2.0 * MAX_ACCEL * fabs(d));
+
+        //double max_speed_inc = (turn_delta * (po->time_curr - po->time_prev));
         
+        //p->motorspeed_r -= clamp(turn_delta,-max_speed_inc, max_speed_inc);
+        //p->motorspeed_l += clamp(turn_delta,-max_speed_inc, max_speed_inc);
         p->motorspeed_r -= turn_delta;
         p->motorspeed_l += turn_delta;
       }
@@ -266,5 +274,5 @@ double pid_angle(odotype *odo, double target) {
   d = (p - odo->p_prev) / time_diff;
   odo->p_prev = p;
   
-  return PID_ANGLE_KP*p + PID_ANGLE_KI*i + PID_ANGLE_KD*d;
+  return PID_ANGLE_KR * (PID_ANGLE_KP*p + PID_ANGLE_KI*i + PID_ANGLE_KD*d);
 }

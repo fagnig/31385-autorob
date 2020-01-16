@@ -19,6 +19,8 @@
 #define PID_ANGLE_KI 0.050
 #define PID_ANGLE_KD 0.005
 
+#define PID_ANGLE_KR 1
+
 #define DIST_LINESENSOR_FROM_CENTER 0.15
 
 void update_motcon(motiontype *p, odotype *po, int *linesens_data);
