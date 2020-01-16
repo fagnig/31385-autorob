@@ -119,7 +119,6 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       
       break;
     }
-
     case mot_followline:{
       double max_speed_inc = MAX_ACCEL * (po->time_curr - po->time_prev);
       
@@ -209,8 +208,8 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         
         p->motorspeed_r -= turn_delta;
         p->motorspeed_l += turn_delta;
-        break;
       }
+      break;
     }
   }
 }
