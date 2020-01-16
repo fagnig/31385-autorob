@@ -26,11 +26,15 @@
 #include "odom.h"
 #include "linesensor.h"
 
-// EDIT THIS TO CHANGE PROGRAM
-#define CONF_TO_RUN conf_followbm
+//Double-layered macro stringization
+#define xstr(s) str(s)
+#define str(s) #s
 
 #define ROBOTPORT 24902
 #define SIMULPORT 8000
+
+// EDIT THIS TO CHANGE PROGRAM
+#define CONF_TO_RUN conf_followbm
 
 /////////////////////////////////////////////
 // Robot data connection
@@ -83,6 +87,36 @@ motiontype mot;
 
 int main()
 {
+  char menu_option = 0;
+  int usedport = SIMULPORT;
+
+  while(!menu_option) {
+    puts("Running program " xstr(CONF_TO_RUN) " on:");
+    printf("1. Robot.\n");
+    printf("2. Simulator.\n");
+    
+    if(!scanf("%c",&menu_option)){
+      menu_option = 0;
+    }
+  
+  
+    switch(menu_option){
+  
+      case '1': {
+        usedport = ROBOTPORT;
+        break;
+      }
+      case '2': {
+        usedport = SIMULPORT;
+        break;
+      }
+      default:{
+        menu_option = 0;
+        break;
+      }
+    }
+  }
+
   init_log();
   
   /////////////////////////////////////////////
@@ -97,7 +131,7 @@ int main()
 
   /* Establish connection to robot sensors and actuators.
   */
-  if (rhdConnect('w', "localhost", ROBOTPORT) != 'w') {
+  if (rhdConnect('w', "localhost", usedport) != 'w') {
     printf("Can't connect to rhd \n");
     exit(EXIT_FAILURE);
   }

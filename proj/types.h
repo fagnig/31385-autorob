@@ -28,8 +28,7 @@ typedef struct {
   int crossing_line;
   // internal variables
   int left_enc_old, right_enc_old;
-  double i_sum;
-  double angle_prev;
+  double i_sum, p_prev;
 } odotype;
 
 

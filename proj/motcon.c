@@ -151,7 +151,7 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       double linesens_adj_vals[8];
       for(int i = 0; i < 8; ++i){
         linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i);
-        printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
+        // printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
       }
       grav_line lines[4];
       int numlines = grav_lines(linesens_adj_vals, lines, p->black_line);
@@ -255,15 +255,17 @@ int followline(motiontype *mot, double dist, double speed, int time, int black_l
 double pid_angle(odotype *odo, double target) {
   double p, i, d;
   
+  double time_diff = odo->time_curr - odo->time_prev;
+  
   // Proportional
   p = odo->theta - target;
   
   // Integral
-  i = odo->i_sum += p; // can put a clamp on this
+  i = odo->i_sum += p * time_diff;
   
   // Derivative
-  d = (odo->theta - odo->angle_prev) / (odo->time_curr - odo->time_prev);
-  // update_odo saves time_curr and time_prev
+  d = (p - odo->p_prev) / time_diff;
+  odo->p_prev = p;
   
   return PID_ANGLE_KP*p + PID_ANGLE_KI*i + PID_ANGLE_KD*d;
 }

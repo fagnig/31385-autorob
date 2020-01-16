@@ -11,13 +11,13 @@
 #define MIN_VELOC 0.05
 #define MAX_ACCEL 0.5
 
-// #define PID_ANGLE_KP 0.045
-// #define PID_ANGLE_KI 0.00006
-// #define PID_ANGLE_KD 0.0000045
+// #define PID_ANGLE_KP 0.050
+// #define PID_ANGLE_KI 0.050
+// #define PID_ANGLE_KD 0.005
 
-#define PID_ANGLE_KP 0.04
-#define PID_ANGLE_KI 0.000035
-#define PID_ANGLE_KD 0.000010
+#define PID_ANGLE_KP 0.050
+#define PID_ANGLE_KI 0.050
+#define PID_ANGLE_KD 0.005
 
 #define DIST_LINESENSOR_FROM_CENTER 0.15
 
