@@ -196,26 +196,18 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         // }
         // printf("selected line: %d\n", selected);
         
-        //double line_pos = center_of_gravity(linesens_adj_vals, p->black_line) - 4.0*p->line_to_follow;
         double line_pos = 0.0;
         line_pos = center_of_gravity_line(linesens_adj_vals, p->black_line, lines[selected].first_sens, lines[selected].last_sens);
-        //printf("val: %f\n", line_pos);
         double turn_angle = atan((line_pos/100.0)/DIST_LINESENSOR_FROM_CENTER);
         // printf("Line_pos: %f, turn_angle: %f\n", line_pos, turn_angle);
         double goal_angle = po->theta + turn_angle;
 
         double turn_delta = pid_angle(po, goal_angle);
-        //printf("TRYING TO TURN WITH DV: %f\n", turn_delta_v);
-        
-        //d = (p->w / 2) * (turn_delta);
-        //v_max = sqrt(2.0 * MAX_ACCEL * fabs(d));
 
-        //double max_speed_inc = (turn_delta * (po->time_curr - po->time_prev));
+        double turn_vel = p->w*turn_delta/2;
         
-        //p->motorspeed_r -= clamp(turn_delta,-max_speed_inc, max_speed_inc);
-        //p->motorspeed_l += clamp(turn_delta,-max_speed_inc, max_speed_inc);
-        p->motorspeed_r -= turn_delta;
-        p->motorspeed_l += turn_delta;
+        p->motorspeed_r -= turn_vel;
+        p->motorspeed_l += turn_vel;
       }
       break;
     }

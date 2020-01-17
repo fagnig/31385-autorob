@@ -53,7 +53,7 @@ StateParam conf_turntest[] = {
 };
 
 StateParam conf_followbm[] = {
-  { .state = ms_followline, .speed = 0.30, .dist = 2.5, .is_black = 1, .line_to_follow = LINE_MIDDLE }
+  { .state = ms_followline, .speed = 0.5, .dist = 2.5, .is_black = 1, .line_to_follow = LINE_MIDDLE }
 };
 
 int p_stoponcross(PredicateData dat) {

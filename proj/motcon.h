@@ -15,9 +15,9 @@
 // #define PID_ANGLE_KI 0.050
 // #define PID_ANGLE_KD 0.005
 
-#define PID_ANGLE_KP 0.050
-#define PID_ANGLE_KI 0.050
-#define PID_ANGLE_KD 0.005
+#define PID_ANGLE_KP 0.30
+#define PID_ANGLE_KI 0.20
+#define PID_ANGLE_KD 0.08
 
 #define PID_ANGLE_KR 1
 
