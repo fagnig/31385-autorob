@@ -13,7 +13,7 @@
 //#define WHEEL_CR 0.000103119
 #define DELTA_M (M_PI * WHEEL_DIAMETER / 2000)
 
-void reset_odo(odotype *p);
-void update_odo(odotype *p);
+void reset_odo(odotype *odo);
+void update_odo(odotype *odo);
 
 #endif

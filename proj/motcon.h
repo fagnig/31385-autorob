@@ -23,7 +23,7 @@
 
 #define DIST_LINESENSOR_FROM_CENTER 0.15
 
-void update_motcon(motiontype *p, odotype *po, int *linesens_data);
+void update_motcon(motiontype *mot, odotype *odo, int *linesens_data);
 
 int fwd(motiontype *mot, double dist, double speed, int time);
 int turn(motiontype *mot, double angle, double speed, int time);

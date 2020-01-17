@@ -4,77 +4,77 @@
 #include "utility.h"
 #include "motcon.h"
 
-void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
+void update_motcon(motiontype *mot, odotype *odo, int *linesens_data) {
 
-  if (p->cmd != 0) {
+  if (mot->cmd != 0) {
 
-    p->finished = 0;
-    switch (p->cmd) {
+    mot->finished = 0;
+    switch (mot->cmd) {
       case mot_stop:
-        p->curcmd = mot_stop;
+        mot->curcmd = mot_stop;
         break;
       case mot_move:
-        p->startpos = (p->left_pos + p->right_pos) / 2;
-        p->curcmd = mot_move;
+        mot->startpos = (mot->left_pos + mot->right_pos) / 2;
+        mot->curcmd = mot_move;
         break;
 
       case mot_turn:
-        p->startpos = po->theta;
-        // if (p->angle > 0)
-          // p->startpos = p->right_pos;
+        mot->startpos = odo->theta;
+        // if (mot->angle > 0)
+          // mot->startpos = mot->right_pos;
         // else
-          // p->startpos = p->left_pos;
-        p->curcmd = mot_turn;
+          // mot->startpos = mot->left_pos;
+        mot->curcmd = mot_turn;
         break;
 
       case mot_followline:
-       p->startpos = (p->left_pos + p->right_pos) / 2;
-       p->angle = po->theta;
-       p->curcmd = mot_followline;
+       mot->startpos = (mot->left_pos + mot->right_pos) / 2;
+       mot->angle = odo->theta;
+       mot->curcmd = mot_followline;
        break;
 
     }
 
-    p->cmd = 0;
+    mot->cmd = 0;
   }
 
-  switch (p->curcmd) {
+  switch (mot->curcmd) {
     case mot_stop:
-      p->motorspeed_l = 0;
-      p->motorspeed_r = 0;
+      mot->motorspeed_l = 0;
+      mot->motorspeed_r = 0;
       break;
     case mot_move:{
-      double max_speed_inc = MAX_ACCEL * (po->time_curr - po->time_prev);
+      double max_speed_inc = MAX_ACCEL * (odo->time_curr - odo->time_prev);
       
-      double d = (p->right_pos + p->left_pos) / 2 - p->startpos - p->dist;
+      double d = (mot->right_pos + mot->left_pos) / 2 - mot->startpos - mot->dist;
       double v_max = sqrt(2.0 * MAX_ACCEL * d);
       
       if (d >= 0) {
-        p->finished = 1;
-        p->motorspeed_l = 0;
-        p->motorspeed_r = 0;
+        mot->finished = 1;
+        mot->motorspeed_l = 0;
+        mot->motorspeed_r = 0;
       }
       else {
-        if (p->speedcmd > v_max) // decelerate early to avoid deceleration quicker than a_max
-            p->speedcmd = v_max;
-        if (p->speedcmd < MIN_VELOC)
-            p->speedcmd = MIN_VELOC;
+        if (mot->speedcmd > v_max) // decelerate early to avoid deceleration quicker than a_max
+            mot->speedcmd = v_max;
+        if (mot->speedcmd < MIN_VELOC)
+            mot->speedcmd = MIN_VELOC;
           
-        if (p->motorspeed_l < p->speedcmd)
-            p->motorspeed_l += max_speed_inc;
-        if (p->motorspeed_l > p->speedcmd)
-            p->motorspeed_l = p->speedcmd;
+        if (mot->motorspeed_l < mot->speedcmd)
+            mot->motorspeed_l += max_speed_inc;
+        if (mot->motorspeed_l > mot->speedcmd)
+            mot->motorspeed_l = mot->speedcmd;
         
-        if (p->motorspeed_r < p->speedcmd)
-            p->motorspeed_r += max_speed_inc;
-        if (p->motorspeed_r > p->speedcmd)
-            p->motorspeed_r = p->speedcmd;
+        if (mot->motorspeed_r < mot->speedcmd)
+            mot->motorspeed_r += max_speed_inc;
+        if (mot->motorspeed_r > mot->speedcmd)
+            mot->motorspeed_r = mot->speedcmd;
       }
       break;
     }
     case mot_turn:{
-      double goal_angle = p->angle + p->startpos;
-      double d = (p->w / 2) * (goal_angle - po->theta);
+      double goal_angle = mot->angle + mot->startpos;
+      double d = (mot->w / 2) * (goal_angle - odo->theta);
       double v_max = sqrt(2.0 * MAX_ACCEL * fabs(d));
       
       // can't go faster than v_max or speedcmd (whichever is smaller)
@@ -82,84 +82,84 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
       // can't decelerate (based on not going faster than v_max)
       // negative angle, (positive speed on left wheel)
       
-      if (p->angle > 0) {
+      if (mot->angle > 0) {
           if (d > 0) {
-              p->motorspeed_r += fabs(0.1*(goal_angle - po->theta));
+              mot->motorspeed_r += fabs(0.1*(goal_angle - odo->theta));
           } else {
-              p->motorspeed_r = 0;
-              p->finished = 1;
+              mot->motorspeed_r = 0;
+              mot->finished = 1;
           }
-          p->motorspeed_l = -p->motorspeed_r;
+          mot->motorspeed_l = -mot->motorspeed_r;
           
       } else {
           if (d < 0) {
-              p->motorspeed_l += fabs(0.1*(goal_angle - po->theta));
+              mot->motorspeed_l += fabs(0.1*(goal_angle - odo->theta));
           } else {
-              p->motorspeed_l = 0;
-              p->finished = 1;
+              mot->motorspeed_l = 0;
+              mot->finished = 1;
           }
-          p->motorspeed_r = -p->motorspeed_l;
+          mot->motorspeed_r = -mot->motorspeed_l;
       }
       
       // limit top speed to v_max, to decelerate properly at end.
-      if (p->speedcmd > v_max) {
-          p->speedcmd = v_max;
+      if (mot->speedcmd > v_max) {
+          mot->speedcmd = v_max;
       }
-      if (p->speedcmd < MIN_VELOC) {
-          p->speedcmd = MIN_VELOC;
+      if (mot->speedcmd < MIN_VELOC) {
+          mot->speedcmd = MIN_VELOC;
       }
       
       // limit speed to top speed
-      if (p->motorspeed_r > p->speedcmd) {
-          p->motorspeed_r = p->speedcmd;
-          p->motorspeed_l = -p->speedcmd;
-      } else if (p->motorspeed_l > p->speedcmd) {
-          p->motorspeed_l = p->speedcmd;
-          p->motorspeed_r = -p->speedcmd;
+      if (mot->motorspeed_r > mot->speedcmd) {
+          mot->motorspeed_r = mot->speedcmd;
+          mot->motorspeed_l = -mot->speedcmd;
+      } else if (mot->motorspeed_l > mot->speedcmd) {
+          mot->motorspeed_l = mot->speedcmd;
+          mot->motorspeed_r = -mot->speedcmd;
       }
       
       break;
     }
     case mot_followline:{
-      double max_speed_inc = MAX_ACCEL * (po->time_curr - po->time_prev);
+      double max_speed_inc = MAX_ACCEL * (odo->time_curr - odo->time_prev);
       
-      double d = (p->right_pos + p->left_pos) / 2 - p->startpos - p->dist;
+      double d = (mot->right_pos + mot->left_pos) / 2 - mot->startpos - mot->dist;
       double v_max = sqrt(2.0 * MAX_ACCEL * d);
       
       if (d >= 0) {
-        p->finished = 1;
-        p->motorspeed_l = 0;
-        p->motorspeed_r = 0;
+        mot->finished = 1;
+        mot->motorspeed_l = 0;
+        mot->motorspeed_r = 0;
         break;
       }
     
-      if (p->speedcmd > v_max)
-        p->speedcmd = v_max;
-      if (p->speedcmd < MIN_VELOC)
-        p->speedcmd = MIN_VELOC;
+      if (mot->speedcmd > v_max)
+        mot->speedcmd = v_max;
+      if (mot->speedcmd < MIN_VELOC)
+        mot->speedcmd = MIN_VELOC;
         
-      if (p->motorspeed_l < p->speedcmd)
-        p->motorspeed_l += max_speed_inc;
-      if (p->motorspeed_l > p->speedcmd)
-        p->motorspeed_l = p->speedcmd;
+      if (mot->motorspeed_l < mot->speedcmd)
+        mot->motorspeed_l += max_speed_inc;
+      if (mot->motorspeed_l > mot->speedcmd)
+        mot->motorspeed_l = mot->speedcmd;
       
-      if (p->motorspeed_r < p->speedcmd)
-        p->motorspeed_r += max_speed_inc;
-      if (p->motorspeed_r > p->speedcmd)
-        p->motorspeed_r = p->speedcmd;
+      if (mot->motorspeed_r < mot->speedcmd)
+        mot->motorspeed_r += max_speed_inc;
+      if (mot->motorspeed_r > mot->speedcmd)
+        mot->motorspeed_r = mot->speedcmd;
       
       double linesens_adj_vals[8];
       for(int i = 0; i < 8; ++i){
-        linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i, p->black_line);
+        linesens_adj_vals[i] = convert_linesensor_val(linesens_data[i], i, mot->black_line);
         //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
       }
       grav_line lines[4];
-      int numlines = grav_lines(linesens_adj_vals, lines, p->black_line);
+      int numlines = grav_lines(linesens_adj_vals, lines, mot->black_line);
       
       if(numlines > 0){
         int selected = 0;
         
-        switch (p->line_to_follow) {
+        switch (mot->line_to_follow) {
           case LINE_LEFT: {
             selected = numlines-1;
             break;
@@ -182,12 +182,12 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
           }
         }
         
-        po->crossing_line = 0;
+        odo->crossing_line = 0;
         for (int i = 0; i < numlines; i++) {
           //printf("a: %d, b: %d", lines[i].first_sens, lines[i].last_sens);
 
           if ((lines[i].last_sens - lines[i].first_sens) > 5) {
-            po->crossing_line = 1;
+            odo->crossing_line = 1;
           }
         }
         
@@ -197,17 +197,17 @@ void update_motcon(motiontype *p, odotype *po, int *linesens_data) {
         // printf("selected line: %d\n", selected);
         
         double line_pos = 0.0;
-        line_pos = center_of_gravity_line(linesens_adj_vals, p->black_line, lines[selected].first_sens, lines[selected].last_sens);
+        line_pos = center_of_gravity_line(linesens_adj_vals, mot->black_line, lines[selected].first_sens, lines[selected].last_sens);
         double turn_angle = atan((line_pos/100.0)/DIST_LINESENSOR_FROM_CENTER);
         // printf("Line_pos: %f, turn_angle: %f\n", line_pos, turn_angle);
-        double goal_angle = po->theta + turn_angle;
+        double goal_angle = odo->theta + turn_angle;
 
-        double turn_delta = pid_angle(po, goal_angle);
+        double turn_delta = pid_angle(odo, goal_angle);
 
-        double turn_vel = p->w*turn_delta/2;
+        double turn_vel = mot->w*turn_delta/2;
         
-        p->motorspeed_r -= turn_vel;
-        p->motorspeed_l += turn_vel;
+        mot->motorspeed_r -= turn_vel;
+        mot->motorspeed_l += turn_vel;
       }
       break;
     }
