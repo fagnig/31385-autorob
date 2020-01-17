@@ -1,0 +1,54 @@
+% Initialize key parameters and variables
+  laser "scanpush cmd='zoneobst' "
+
+	warpSpeed = 0.4
+	cruise = 0.3
+	crawl = 0.2
+	speedChangeDist = 0.01
+	distCorrectionForFirstObject = 0.24 % should yield a delta_y of 2.3
+	distFromWheelsToLineSensors = 0.22
+	stopDistFromObjects = 0.2 % must be at least 0.1
+	IRSensorInfinityReading = 0.888889
+	SMRsideLength = 0.28
+	maxWhiteLineTime = 15
+	garageWidth = 0.485
+	garageLength = 0.60
+	garageDoorOverhange = 0.19
+	gateWidth = 0.45
+	shortcutAngle =-85 % todo: fix this IMPORTANT magic number
+	%distToMoveBox = 0.50
+
+
+	followline "bm" : ($crossingblackline)
+	fwd distFromWheelsToLineSensors
+
+	turn -90
+
+% Loop around wall
+
+	fwd distFromWheelsToLineSensors @v crawl
+	wallDist = $irdistright
+	followwall "r" wallDist : ($irdistright > 0.8*IRSensorInfinityReading)
+	y = $irdistright
+
+	dist = distFromWheelsToLineSensors + gateWidth/2
+	fwd dist
+
+	turn -90
+
+	dist =  (wallDist + SMRsideLength/2) + SMRsideLength + distFromWheelsToLineSensors
+	fwd dist
+
+	turn -90
+
+	fwd distFromWheelsToLineSensors @v cruise
+	wallDist = $irdistright
+	followwall "r" wallDist : ($irdistright > 0.8*IRSensorInfinityReading)
+	drive: ($crossingblackline)
+	fwd distFromWheelsToLineSensors
+
+	turn -90
+
+% Follow black line, turn to white line, and then follow it until its end
+
+	followline "bm" : ($crossingblackline)

@@ -20,6 +20,7 @@
 
 #include "proj.h"
 #include "configs.h"
+#include "compconfigs.h"
 #include "types.h"
 #include "utility.h"
 #include "motcon.h"
@@ -34,7 +35,7 @@
 #define SIMULPORT 8000
 
 // EDIT THIS TO CHANGE PROGRAM
-#define CONF_TO_RUN conf_followbm
+#define CONF_TO_RUN conf_followwm
 
 /////////////////////////////////////////////
 // Robot data connection
@@ -84,6 +85,7 @@ symTableElement *lenc, *renc, *linesensor, *irsensor, *speedl, *speedr, *resetmo
 odotype odo;
 smtype mission;
 motiontype mot;
+linedata lindat;
 
 int main()
 {
@@ -236,7 +238,7 @@ int main()
   mission.oldstate = -1;
   
   // Predicate data
-  PredicateData pred_data = { .mot=&mot, .odo=&odo, .laserpar=laserpar};
+  PredicateData pred_data = { .mot=&mot, .odo=&odo, .lindat = &lindat, .laserpar=laserpar};
   
   while (running) {
     if (lmssrv.config && lmssrv.status && lmssrv.connected) {
@@ -254,6 +256,8 @@ int main()
     odo.left_enc = lenc->data[0];
     odo.right_enc = renc->data[0];
     update_odo(&odo);
+    lindat.raw_dat = linesensor->data;
+    update_linesensor(&lindat);
     
     // for(int i = 0; i<5; i++){
       // printf("%d ", irsensor->data[i]);
@@ -292,6 +296,7 @@ int main()
       }
       
       case ms_nextstate: {
+        mot.cmd = mot_stop;
         mission.state = config[++nextparam].state;
         break;
       }
@@ -312,6 +317,13 @@ int main()
       
       case ms_followline: {
         if (followline(&mot, config[nextparam].dist, config[nextparam].speed, mission.time, config[nextparam].is_black, config[nextparam].line_to_follow)) {
+          mission.state = ms_nextstate;
+        }
+        break;
+      }
+
+      case ms_wait: {
+        if (wait(&mot, config[nextparam].delay, mission.time)) {
           mission.state = ms_nextstate;
         }
         break;
@@ -337,7 +349,7 @@ int main()
 
     mot.left_pos = odo.left_pos;
     mot.right_pos = odo.right_pos;
-    update_motcon(&mot, &odo, linesensor->data);
+    update_motcon(&mot, &odo, &lindat);
     speedl->data[0] = 100 * mot.motorspeed_l;
     speedl->updated = 1;
     speedr->data[0] = 100 * mot.motorspeed_r;

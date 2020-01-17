@@ -1,0 +1,32 @@
+% Initialize key parameters and variables
+
+	warpSpeed = 0.4
+	cruise = 0.3
+	crawl = 0.2
+	speedChangeDist = 0.01
+	distCorrectionForFirstObject = 0.24 % should yield a delta_y of 2.3
+	distFromWheelsToLineSensors = 0.22
+	stopDistFromObjects = 0.2 % must be at least 0.1
+	IRSensorInfinityReading = 0.888889
+	SMRsideLength = 0.28
+	maxWhiteLineTime = 15
+	garageWidth = 0.485
+	garageLength = 0.60
+	garageDoorOverhange = 0.19
+	gateWidth = 0.45
+	shortcutAngle =-85 % todo: fix this IMPORTANT magic number
+	%distToMoveBox = 0.50
+
+
+
+
+% Follow black line, turn to white line, and then follow it until its end
+
+	followline "wm" : ($crossingblackline)
+	fwd distFromWheelsToLineSensors
+
+	turn -45
+
+	fwd 0.5 % todo: fix this IMPORTANT magic number
+	t0 = $time
+	followline "wm" : ($time - t0 > maxWhiteLineTime)

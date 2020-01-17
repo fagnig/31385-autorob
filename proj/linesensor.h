@@ -10,6 +10,8 @@
 
 #include "types.h"
 
+void update_linesensor(linedata *lindat);
+
 double convert_linesensor_val(double in, int i, int is_black);
 double convert_linesensor_val_internal(double in, double calval_factor, double calval_offset);
 

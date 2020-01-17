@@ -11,7 +11,6 @@ void reset_odo(odotype * odo)
   odo->left_enc_old = odo->left_enc;
   odo->x = odo->y = odo->theta = 0.0;
   odo->time_start = odo->time_prev = odo->time_curr = get_time();
-  odo->crossing_line = 0;
 }
 
 void update_odo(odotype *odo)

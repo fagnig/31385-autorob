@@ -4,9 +4,37 @@
 static double linesens_poss[8] = {-7.0, -5.0, -3.0, -1.0, 1.0, 3.0, 5.0, 7.0};
 
 static double black_val[8] = {49.66,50.15,54.35,53.37,55.79,61.15,56.70,52.61};
-//static double gray_val[8] = {56.66,58.95,61.00,59.37,78.79,69.15,78.70,64.61};
-static double white_val[8] = {72.61,78.20,78.12,77.35,134.11,91.40,138.32,95.49};
+static double gray_val[8] = {56.66,58.95,61.00,59.37,78.79,69.15,78.70,64.61};
+//static double white_val[8] = {72.61,78.20,78.12,77.35,134.11,91.40,138.32,95.49};
+static double white_val[8] = {59.61,61.20,64.12,60.35,88.11,72.40,92.32,69.49};
 
+
+void update_linesensor(linedata *lindat){
+
+  for(int i = 0; i < 8; ++i){
+    lindat->adj_dat[i] = convert_linesensor_val(lindat->raw_dat[i], i, 1);
+    //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
+  }
+
+  lindat->numlines_b = grav_lines(lindat->adj_dat, lindat->lines_b, 1);
+  lindat->numlines_w = grav_lines(lindat->adj_dat, lindat->lines_w, 0);
+
+  lindat->crossing_line_b = 0;
+  lindat->crossing_line_w = 0;
+  for (int i = 0; i < lindat->numlines_b; i++) {
+    if ((lindat->lines_b[i].last_sens - lindat->lines_b[i].first_sens) > 7) {
+      lindat->crossing_line_b = 1;
+    }
+  }
+
+  for (int i = 0; i < lindat->numlines_w; i++) {
+    if ((lindat->lines_w[i].last_sens - lindat->lines_w[i].first_sens) > 7) {
+      lindat->crossing_line_w = 1;
+    }
+  }
+
+  printf("numlines_w: %d \n",lindat->numlines_w);
+}
 
 double convert_linesensor_val(double in, int i, int is_black) {
   //if(is_black){
@@ -14,6 +42,7 @@ double convert_linesensor_val(double in, int i, int is_black) {
   //} else{
   //  return convert_linesensor_val_internal(in, gray_val[i], white_val[i]);
   //}
+
   return convert_linesensor_val_internal(in, black_val[i], white_val[i]);
 }
 
@@ -144,4 +173,5 @@ double center_of_gravity_line(double* linesens_vals, int is_black, int from, int
   }
   return sum_top / sum_bot;
 }
+
 
