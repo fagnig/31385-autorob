@@ -19,6 +19,15 @@ Reorganize C project *
 
 
 
+Obstacles tested:
+  Garage *
+  Gate on the loose *
+  White Line
+  Push box *
+  Wall following *
+  Distance measurement -
+
+
 Distance Measurement
   Get to working position
     Reach from prev task
