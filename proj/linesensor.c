@@ -33,7 +33,6 @@ void update_linesensor(linedata *lindat){
     }
   }
 
-  printf("numlines_w: %d \n",lindat->numlines_w);
 }
 
 double convert_linesensor_val(double in, int i, int is_black) {

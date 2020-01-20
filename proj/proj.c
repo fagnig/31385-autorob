@@ -26,6 +26,7 @@
 #include "motcon.h"
 #include "odom.h"
 #include "linesensor.h"
+#include "irsensor.h"
 
 //Double-layered macro stringization
 #define xstr(s) str(s)
@@ -35,7 +36,7 @@
 #define SIMULPORT 8000
 
 // EDIT THIS TO CHANGE PROGRAM
-#define CONF_TO_RUN conf_followwm
+#define CONF_TO_RUN conf_comp
 
 /////////////////////////////////////////////
 // Robot data connection
@@ -49,6 +50,8 @@ struct {
 
 double visionpar[10];
 double laserpar[10];
+
+double irpar[5];
 
 componentservertype lmssrv, camsrv;
 void serverconnect(componentservertype *s);
@@ -238,7 +241,7 @@ int main()
   mission.oldstate = -1;
   
   // Predicate data
-  PredicateData pred_data = { .mot=&mot, .odo=&odo, .lindat = &lindat, .laserpar=laserpar};
+  PredicateData pred_data = { .mot=&mot, .odo=&odo, .lindat = &lindat, .laserpar=laserpar, .irpar=irpar};
   
   while (running) {
     if (lmssrv.config && lmssrv.status && lmssrv.connected) {
@@ -258,6 +261,7 @@ int main()
     update_odo(&odo);
     lindat.raw_dat = linesensor->data;
     update_linesensor(&lindat);
+    irsensor_get_adjusted_values(irsensor->data,irpar);
     
     // for(int i = 0; i<5; i++){
       // printf("%d ", irsensor->data[i]);

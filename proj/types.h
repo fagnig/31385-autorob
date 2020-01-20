@@ -77,6 +77,7 @@ typedef struct {
   odotype* odo;
   linedata* lindat;
   double* laserpar;
+  double* irpar;
 } PredicateData;
 
 typedef struct {

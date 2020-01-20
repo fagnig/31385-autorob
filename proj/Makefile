@@ -12,7 +12,7 @@ LDFLAGS = -L${SMR}/lib
 #
 PROG   = proj
 HDRS   =
-OBJS   = proj.o linesensor.o utility.o motcon.o odom.o serverif.o
+OBJS   = proj.o linesensor.o utility.o motcon.o odom.o irsensor.o serverif.o
 LIBS   = -lm /usr/local/smr/lib/librhd.a -lrobot
 
 all:	${PROG}
