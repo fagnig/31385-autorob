@@ -28,7 +28,7 @@ int p_stoponcross(PredicateData dat) {
   return dat.lindat->crossing_line_b;
 }
 
-const double max_dist_to_wall = 1.0;
+const double max_dist_to_wall = 0.5;
 double dist_to_wall = 0.0;
 int p_findwall(PredicateData dat) {
   if (dat.irpar[4] > 0.01 && dat.irpar[4] < max_dist_to_wall) {
@@ -39,8 +39,8 @@ int p_findwall(PredicateData dat) {
   return 0;
 }
 int p_findopening(PredicateData dat) {
-  if(dat.irpar[4] > dist_to_wall) printf("Wall found %f\n", dist_to_wall);
-  return dat.irpar[4] > dist_to_wall;
+  if(dat.irpar[4] > 0.5) printf("Wall found %f\n", dat.irpar[4]);
+  return dat.irpar[4] > 0.5;
 }
 
 int p_stoponline(PredicateData dat){
@@ -83,63 +83,65 @@ int p_followwall_2(PredicateData dat) {
 }
 // Hack the angle of a turn command, but only once.
 int p_followwall_hackangle(PredicateData dat) {
-  dat.mot->angle = -followwall_angle;
+  dat.mot->angle = -(followwall_angle/2);
   return 0;
 }
 
 StateParam conf_comp[] = {
-  /*
+  
   //Measure box
-  { .state = ms_fwd, .speed = 0.3, .dist = 0.4},
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.4},
   { .state = ms_wait, .delay = 0.2 },
   { .state = ms_wait, .delay = 0.0, .p_stop = p_print_dist_to_box },
 
   //First transit
-  { .state = ms_turn, .speed = 0.3, .angle = 45.0 / 180.0 * M_PI },
-  { .state = ms_followline, .speed = 0.3, .dist = 1.0, .is_black = 1, .line_to_follow = LINE_RIGHT},
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = 45.0 / 180.0 * M_PI },
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 1.3, .is_black = 1, .line_to_follow = LINE_RIGHT},
   { .state = ms_wait, .delay = 0.2 },
-  { .state = ms_followline, .speed = 0.5, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE},
+  { .state = ms_followline, .speed = SPEED_RECKLESS, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE},
 
   //Push the box & go through gate
-  { .state = ms_followline, .speed = 0.3, .dist = 8.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 8.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_stoponcross},
-  { .state = ms_fwd, .speed = 0.3, .dist = 0.5},
-  { .state = ms_fwd, .speed = -0.3, .dist = 1.5},
-  { .state = ms_turn, .speed = 0.3, .angle = 90.0 / 180.0 * M_PI },
-  { .state = ms_fwd, .speed = 0.3, .dist = 1.5, .p_stop = p_stoponline},
-  { .state = ms_fwd, .speed = 0.3, .dist = 0.3},
-  { .state = ms_turn, .speed = 0.3, .angle = -90.0 / 180.0 * M_PI },
-  { .state = ms_followline, .speed = 0.5, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.5},
+  { .state = ms_fwd, .speed = -SPEED_SAFE, .dist = 1.5},
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = 90.0 / 180.0 * M_PI },
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.5, .p_stop = p_stoponline},
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.3},
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_followline, .speed = SPEED_RECKLESS, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_stoponcross},
-  { .state = ms_fwd, .speed = 0.3, .dist = 0.3},
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.3},
 
 
   //Transit to loose gate
-  { .state = ms_followline, .speed = 0.3, .dist = 1.0, .is_black = 1, .line_to_follow = LINE_LEFT},
-  { .state = ms_followline, .speed = 0.5, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 1.0, .is_black = 1, .line_to_follow = LINE_LEFT},
+  { .state = ms_followline, .speed = SPEED_RECKLESS, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_stoponcross},
-  { .state = ms_fwd, .speed = 0.3, .dist = 0.3},
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.3},
 
   //Find gate and...
-  { .state = ms_followline, .speed = 0.3, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_findwall},
-  { .state = ms_followline, .speed = 0.3, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_findopening},
 
   //...Go through it
-  { .state = ms_fwd, .speed = 0.3, .dist = 0.5 },
-  { .state = ms_turn, .speed = 0.3, .angle = -90.0 / 180.0 * M_PI },
-  { .state = ms_fwd, .speed = 0.3, .dist = 1.0 },
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.5 },
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.0 },
   
-  */
+  
 
-  /*
+  
   //Transit to wall following
+  
   { .state = ms_turn, .speed = SPEED_SAFE, .angle = 80.0 / 180.0 * M_PI },
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 2.0, .p_stop = p_stoponline},
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.3},
   { .state = ms_turn, .speed = SPEED_SAFE, .angle = -80.0 / 180.0 * M_PI },
-  { .state = ms_followline, .speed = 0.5, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+  
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_stoponcross},
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 0.3},
 
@@ -161,7 +163,7 @@ StateParam conf_comp[] = {
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 10.0, .p_stop = p_findopening},
 
   //Go through the gate
-  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = DIST_AXLE_TO_IRSENSOR*2 },
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = DIST_AXLE_TO_IRSENSOR + 0.08},
   { .state = ms_turn, .speed = SPEED_SAFE, .angle = -90.0 / 180.0 * M_PI },
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.0 },
   { .state = ms_turn, .speed = SPEED_SAFE, .angle = -90.0 / 180.0 * M_PI },
@@ -181,19 +183,22 @@ StateParam conf_comp[] = {
   //Find cross before white line
   { .state = ms_followline, .speed = 0.5, .dist = 2.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
     .p_stop = p_stoponcross},
-  */
+  
   
   //Traverse white line (odom)
-
-    
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.5},
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 10.0, .p_stop = p_stoponcross },
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = DIST_AXLE_TO_LINESENSOR},
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = 90.0 / 180.0 * M_PI },
   /// TEMP
-  { .state = ms_followline, .speed = SPEED_SLOW, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
-    .p_stop = p_stoponcross},
+  
+
   ///
 
   //Do the goal dance
-  //{ .state = ms_followline, .speed = SPEED_SAFE, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
-  //  .p_stop = p_stoponcross},
+  { .state = ms_followline, .speed = SPEED_SAFE, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
+    .p_stop = p_stoponcross},
   { .state = ms_fwd, .speed = SPEED_SLOW, .dist = 0.2},
 
   { .state = ms_followline, .speed = SPEED_SLOW, .dist = 10.0, .is_black = 1, .line_to_follow = LINE_MIDDLE,
@@ -205,8 +210,10 @@ StateParam conf_comp[] = {
 
   { .state = ms_turn, .speed = SPEED_SLOW, .angle = -90.0 / 180.0 * M_PI },
 
-  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.0/*DIST_AXLE_TO_LINESENSOR + STOPDISTFROMOBJECTS + (DIM_GARAGE_LENGTH/2)*/},
-
+  //noget med en afstand
+  //DIST_AXLE_TO_LINESENSOR + STOPDISTFROMOBJECTS + (DIM_GARAGE_LENGTH/2)
+  { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.0 },
+  
   { .state = ms_turn, .speed = SPEED_SLOW, .angle = 90.0 / 180.0 * M_PI },
 
   { .state = ms_fwd, .speed = -SPEED_SLOW, .dist = (0.75*DIM_GARAGE_DOOR)},
@@ -222,7 +229,7 @@ StateParam conf_comp[] = {
   { .state = ms_turn, .speed = SPEED_SLOW, .angle = 90.0 / 180.0 * M_PI },
 
   { .state = ms_fwd, .speed = -SPEED_SAFE, .dist = DIM_SMR_SIDELENGTH + (DIST_AXLE_TO_LINESENSOR*1.5) + 0.05},
-
+  
 };
 
 

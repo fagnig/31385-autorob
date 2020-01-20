@@ -22,13 +22,13 @@ void update_linesensor(linedata *lindat){
   lindat->crossing_line_b = 0;
   lindat->crossing_line_w = 0;
   for (int i = 0; i < lindat->numlines_b; i++) {
-    if ((lindat->lines_b[i].last_sens - lindat->lines_b[i].first_sens) > 7) {
+    if ((lindat->lines_b[i].last_sens - lindat->lines_b[i].first_sens) > 4) {
       lindat->crossing_line_b = 1;
     }
   }
 
   for (int i = 0; i < lindat->numlines_w; i++) {
-    if ((lindat->lines_w[i].last_sens - lindat->lines_w[i].first_sens) > 7) {
+    if ((lindat->lines_w[i].last_sens - lindat->lines_w[i].first_sens) > 4) {
       lindat->crossing_line_w = 1;
     }
   }
