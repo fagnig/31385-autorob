@@ -191,6 +191,7 @@ StateParam conf_comp[] = {
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 10.0, .p_stop = p_stoponcross },
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = DIST_AXLE_TO_LINESENSOR},
   { .state = ms_turn, .speed = SPEED_SAFE, .angle = 90.0 / 180.0 * M_PI },
+  
   /// TEMP
   
 
