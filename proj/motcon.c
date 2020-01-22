@@ -166,7 +166,7 @@ void update_motcon(motiontype *mot, odotype *odo, linedata *lindat) {
       int numlines = mot->black_line ? lindat->numlines_b : lindat->numlines_w;
       grav_line* lines = mot->black_line ? lindat->lines_b : lindat->lines_w;
 
-      if(numlines > 0){
+      if(numlines > 0 && !lindat->crossing_line_b){
         int selected = 0;
         
         switch (mot->line_to_follow) {
@@ -194,12 +194,12 @@ void update_motcon(motiontype *mot, odotype *odo, linedata *lindat) {
 
         
         double line_pos = 0.0;
-        line_pos = center_of_gravity_line(lindat->adj_dat, mot->black_line, lines[selected].first_sens, lines[selected].last_sens);
+        line_pos = center_of_gravity_line(  ( mot->black_line ? lindat->adj_datb : lindat->adj_datw )  , mot->black_line, lines[selected].first_sens, lines[selected].last_sens);
         double turn_angle = atan((line_pos/100.0)/DIST_LINESENSOR_FROM_CENTER);
         // printf("Line_pos: %f, turn_angle: %f\n", line_pos, turn_angle);
         double goal_angle = odo->theta + turn_angle;
 
-        double turn_delta = pid_angle(odo, goal_angle);
+        double turn_delta = (mot->turning_intensity+1)*pid_angle(odo, goal_angle);
 
         double turn_vel = mot->w*turn_delta/2;
         
@@ -240,7 +240,7 @@ int turn(motiontype *mot, double angle, double speed, int time) {
     return mot->finished;
 }
 
-int followline(motiontype *mot, double dist, double speed, int time, int black_line, int line_to_follow)
+int followline(motiontype *mot, odotype *odo, double dist, double speed, int time, int black_line, int line_to_follow, double turning_intensity)
 {
   if (time == 0){
     mot->cmd = mot_followline;
@@ -248,6 +248,10 @@ int followline(motiontype *mot, double dist, double speed, int time, int black_l
     mot->dist = dist;
     mot->black_line = black_line;
     mot->line_to_follow = line_to_follow;
+    mot->turning_intensity = turning_intensity;
+
+    odo->i_sum = 0;
+    odo->p_prev = 0;
     
     return 0;
   } else {
@@ -276,10 +280,11 @@ double pid_angle(odotype *odo, double target) {
   
   // Integral
   i = odo->i_sum += p * time_diff;
-  
+
+
   // Derivative
   d = (p - odo->p_prev) / time_diff;
   odo->p_prev = p;
   
-  return PID_ANGLE_KR * (PID_ANGLE_KP*p + PID_ANGLE_KI*i + PID_ANGLE_KD*d);
+  return (PID_ANGLE_KP*p) + (PID_ANGLE_KI*i) + (PID_ANGLE_KD*d);
 }

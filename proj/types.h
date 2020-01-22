@@ -40,6 +40,7 @@ typedef struct {
   double angle;
   int black_line;
   int line_to_follow;
+  double turning_intensity;
   double left_pos, right_pos;
   double delay;
   // parameters
@@ -63,7 +64,8 @@ typedef struct {
 
 typedef struct {
   int *raw_dat;
-  double adj_dat[8];
+  double adj_datb[8];
+  double adj_datw[8];
   int numlines_b;
   int numlines_w;
   grav_line lines_b[4];
@@ -86,6 +88,7 @@ typedef struct {
   double dist;
   double angle;
   double delay;
+  double turning_intensity;
   int is_black;
   int line_to_follow; // line to follow enum
   int (*p_stop)(PredicateData);

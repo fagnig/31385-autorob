@@ -3,32 +3,33 @@
 
 static double linesens_poss[8] = {-7.0, -5.0, -3.0, -1.0, 1.0, 3.0, 5.0, 7.0};
 
-static double black_val[8] = {49.66,50.15,54.35,53.37,55.79,61.15,56.70,52.61};
+//static double black_val[8] = {49.66,50.15,54.35,53.37,55.79,61.15,56.70,52.61};
+static double black_val[8] = {50.66,50.15,54.35,53.37,55.79,60.15,55.70,52.61};
 static double gray_val[8] = {56.66,58.95,61.00,59.37,78.79,69.15,78.70,64.61};
 //static double white_val[8] = {72.61,78.20,78.12,77.35,134.11,91.40,138.32,95.49};
-static double white_val[8] = {59.61,61.20,64.12,60.35,88.11,72.40,92.32,69.49};
-
+//static double white_val[8] = {59.61,61.20,64.12,60.35,88.11,72.40,92.32,69.49};
+static double white_val[8] = {75.61,80.20,79.12,79.35,135.11,94.40,140.32,96.49};
 
 void update_linesensor(linedata *lindat){
 
   for(int i = 0; i < 8; ++i){
-    lindat->adj_dat[i] = convert_linesensor_val(lindat->raw_dat[i], i, 1);
+    lindat->adj_datb[i] = convert_linesensor_val(lindat->raw_dat[i], i, 1);
+    lindat->adj_datw[i] = convert_linesensor_val(lindat->raw_dat[i], i, 0);
     //printf("Offset: %d Raw: %d, Adj: %f \n", i, linesens_data[i], linesens_adj_vals[i]);
   }
 
-  lindat->numlines_b = grav_lines(lindat->adj_dat, lindat->lines_b, 1);
-  lindat->numlines_w = grav_lines(lindat->adj_dat, lindat->lines_w, 0);
+  grav_lines(lindat);
 
   lindat->crossing_line_b = 0;
   lindat->crossing_line_w = 0;
   for (int i = 0; i < lindat->numlines_b; i++) {
-    if ((lindat->lines_b[i].last_sens - lindat->lines_b[i].first_sens) > 4) {
+    if ((lindat->lines_b[i].last_sens - lindat->lines_b[i].first_sens) > MIN_LINES_FOR_CROSS) {
       lindat->crossing_line_b = 1;
     }
   }
 
   for (int i = 0; i < lindat->numlines_w; i++) {
-    if ((lindat->lines_w[i].last_sens - lindat->lines_w[i].first_sens) > 4) {
+    if ((lindat->lines_w[i].last_sens - lindat->lines_w[i].first_sens) > MIN_LINES_FOR_CROSS_WHITE) {
       lindat->crossing_line_w = 1;
     }
   }
@@ -36,11 +37,11 @@ void update_linesensor(linedata *lindat){
 }
 
 double convert_linesensor_val(double in, int i, int is_black) {
-  //if(is_black){
-  //  return convert_linesensor_val_internal(in, black_val[i], gray_val[i]);
-  //} else{
-  //  return convert_linesensor_val_internal(in, gray_val[i], white_val[i]);
-  //}
+  if(is_black){
+    return convert_linesensor_val_internal(in, black_val[i], white_val[i]);
+  } else{
+    return convert_linesensor_val_internal(in, gray_val[i], white_val[i]);
+  }
 
   return convert_linesensor_val_internal(in, black_val[i], white_val[i]);
 }
@@ -102,40 +103,45 @@ int linesens_has_cross(double * linesens_vals, int is_black) {
   return num_sensors_line > MIN_LINES_FOR_CROSS;
 }
 
-int grav_lines(double *line_adj_vals, grav_line *out, int is_black) {
-  int acqline = 0;
-  int num_lines = 0;
+void grav_lines(linedata *lindat) {
+  int acqlineb = 0;
+  int acqlinew = 0;
+  int num_linesb = 0;
+  int num_linesw = 0;
   
-  if (is_black) {
-    for (int i = 0; i < NUM_LINESENSORS; i++) {
-      if (line_adj_vals[i] < BLACK_THRESHOLD && !acqline) {
-        acqline = 1;
-        out[num_lines].first_sens = i;
-      } else if (line_adj_vals[i] > BLACK_THRESHOLD && acqline) {
-        acqline = 0;
-        out[num_lines].last_sens = i;
-        num_lines++;
-      }
-    }    
-  } else {
-    for (int i = 0; i < NUM_LINESENSORS; i++) {
-      if (line_adj_vals[i] > WHITE_THRESHOLD && !acqline) {
-        acqline = 1;
-        out[num_lines].first_sens = i;
-      } else if (line_adj_vals[i] < WHITE_THRESHOLD && acqline) {
-        acqline = 0;
-        out[num_lines].last_sens = i;
-        num_lines++;
-      }
-    }    
+  for (int i = 0; i < NUM_LINESENSORS; i++) {
+    //Black lines
+    if (lindat->adj_datb[i] < BLACK_THRESHOLD && !acqlineb) {
+      acqlineb = 1;
+      lindat->lines_b[num_linesb].first_sens = i;
+    } else if (lindat->adj_datb[i] > BLACK_THRESHOLD && acqlineb) {
+      acqlineb = 0;
+      lindat->lines_b[num_linesb].last_sens = i;
+      num_linesb++;
+    }
+    //White lines
+    if (lindat->adj_datw[i] > WHITE_THRESHOLD && !acqlinew) {
+      acqlinew = 1;
+      lindat->lines_w[num_linesw].first_sens = i;
+    } else if (lindat->adj_datw[i] < WHITE_THRESHOLD && acqlinew) {
+      acqlinew = 0;
+      lindat->lines_w[num_linesw].last_sens = i;
+      num_linesw++;
+    }
+  }    
+  
+  if (acqlineb) {
+    lindat->lines_b[num_linesb].last_sens = NUM_LINESENSORS;
+    num_linesb++;
   }
-  
-  if (acqline) {
-    out[num_lines].last_sens = NUM_LINESENSORS;
-    num_lines++;
+  if (acqlinew) {
+    lindat->lines_w[num_linesw].last_sens = NUM_LINESENSORS;
+    num_linesw++;
   }
+
+  lindat->numlines_b = num_linesb;
+  lindat->numlines_w = num_linesw;
   
-  return num_lines;
 }
 
 double center_of_gravity(double* linesens_vals, int is_black) {

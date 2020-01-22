@@ -4,9 +4,10 @@
 #define NUM_LINESENSORS 8
 
 #define BLACK_THRESHOLD 0.2
-#define WHITE_THRESHOLD 0.8
+#define WHITE_THRESHOLD 0.6
 
 #define MIN_LINES_FOR_CROSS 6
+#define MIN_LINES_FOR_CROSS_WHITE 5
 
 #include "types.h"
 
@@ -23,7 +24,7 @@ int linesens_find_line(double * linesens_vals, int is_black);
 int linesens_has_line(double * linesens_vals, int is_black);
 int linesens_has_cross(double * linesens_vals, int is_black);
 
-int grav_lines(double *line_adj_vals, grav_line *out, int is_black);
+void grav_lines(linedata *lindat);
 double center_of_gravity(double* linesens_vals, int is_black);
 double center_of_gravity_line(double* linesens_vals, int is_black, int from, int to);
 

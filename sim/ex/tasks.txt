@@ -1,21 +1,32 @@
 Implement SMRCL-like commands in C *
   Drive *
-  Stop
+  Stop *
     After distance *
     On crossing line *
-    IR detection -
+    IR detection *
     Laser detection *
+    Predicate system for stopping *
   Turn *
-  Line following *
-IR distance -
-  Calibrate sideways IR sensors -
-  Wall following -
-Laser Distance *
+  Line following
+    Black line following *
+    White line following
+IR distance *
+  Calibrate sideways IR sensors *
   Wall following *
-SMRCL course solution 
-Port SMRCL solution to C 
+Laser Distance *
+  Wall following -
+Map replica for simulator *
+SMRCL course solution *
+Port SMRCL solution to C *
+  Simpler config than state machine *
 Reorganize C project *
-
+Final map replica for simulator *
+Adjust SMRCL solution to final course
+  Simulator *
+  Real course *
+Adjust C solution to final course
+  Simulator 
+  Real course 
 
 
 
@@ -30,7 +41,6 @@ Obstacles tested:
 
 Distance Measurement
   Get to working position
-    Reach from prev task
   Measure using IR
   Print measurement
 

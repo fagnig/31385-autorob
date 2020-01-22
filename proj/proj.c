@@ -236,6 +236,7 @@ int main()
   reset_odo(&odo);
   printf("position: %f, %f\n", odo.left_pos, odo.right_pos);
   mot.w = odo.w;
+  mot.turning_intensity = PID_ANGLE_KR;
   running = 1;
   mission.state = ms_init;
   mission.oldstate = -1;
@@ -320,7 +321,7 @@ int main()
       }
       
       case ms_followline: {
-        if (followline(&mot, config[nextparam].dist, config[nextparam].speed, mission.time, config[nextparam].is_black, config[nextparam].line_to_follow)) {
+        if (followline(&mot, &odo, config[nextparam].dist, config[nextparam].speed, mission.time, config[nextparam].is_black, config[nextparam].line_to_follow, config[nextparam].turning_intensity)) {
           mission.state = ms_nextstate;
         }
         break;
