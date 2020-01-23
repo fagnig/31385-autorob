@@ -138,7 +138,7 @@ StateParam conf_comp[] = {
   //{ .state = ms_followline, .speed = SPEED_SAFE, .dist = 1.5, .is_black = 1, .line_to_follow = LINE_MIDDLE, .turning_intensity = 0.4},
   
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.85},
-  { .state = ms_turn, .speed = SPEED_SAFE, .angle = -90.0 / 180.0 * M_PI },
+  { .state = ms_turn, .speed = SPEED_SAFE, .angle = -87.0 / 180.0 * M_PI },
   { .state = ms_fwd, .speed = SPEED_SAFE, .dist = 1.0},
 
   //Push the box & go through gate

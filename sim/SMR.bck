@@ -1,0 +1,241 @@
+% Initialize key parameters and variables
+
+	turnSpeed = 0.1
+	crawl = 0.06
+	cruise = 0.2
+	warp = 0.2
+	speedChangeDist = 0.001
+	distCorrectionForFirstObject = 0.1 % should yield a delta_y of 2.3
+	exactDistanceToFirstObject = 2.35
+	distFromWheelsToLineSensors = 0.22
+	stopDistFromObjects = 0.2 % must be at least 0.1
+	IRSensorInfinityReading = 0.888889
+	SMRsideLength = 0.28
+	maxWhiteLineTime = 17.5
+	garageWidth = 0.485
+	garageLength = 0.60
+	garageDoorOverhang = 0.19
+	gateWidth = 0.45
+	shortcutAngle = 90 % todo: fix this IMPORTANT magic number
+	%distToMoveBox = 0.50
+
+% Start logging
+
+	log "$time" "$odox" "$odoy" "$odoth" "$irdistright" "$irdistfrontmiddle"
+
+% Drive from start to first box, start logs, and take required measurement
+
+	followline "br" @v cruise: ($irdistfrontmiddle < stopDistFromObjects)
+	stop
+
+	lateralDistanceToFirstOjbect = -$odoy + stopDistFromObjects + distCorrectionForFirstObject
+	
+
+
+
+	%*********************************************************************
+	%********     Lateral Distance to First Object (in meters)    ********
+	%*********************************************************************
+
+	eval lateralDistanceToFirstOjbect
+
+	%*********************************************************************
+	%*********************************************************************
+	%*********************************************************************
+
+
+
+	y0 = $odoy
+	wait 1
+
+% Turn and shortcut to boxed-gate branch
+
+	dist = 1.35 + y0 % todo: fix magic number
+	fwd dist @v warp
+	stop
+
+	turn 90 @v turnSpeed
+	stop
+
+	drive @v cruise : ($crossingblackline)
+	stop
+	fwd distFromWheelsToLineSensors @v warp
+	drive @v cruise : ($crossingblackline)
+	stop
+	fwd distFromWheelsToLineSensors @v warp
+	stop
+
+	turn -90 @v turnSpeed
+	stop
+	y1 = $odoy
+
+% Drive to boxed gate and push box
+
+	followline "bm" @v cruise : ($irdistfrontmiddle < stopDistFromObjects)
+	stop
+	ignoreobstacles
+	followline "bm" @v cruise: ($crossingblackline)
+	stop
+	ignoreobstacles
+	fwd distFromWheelsToLineSensors @v cruise
+	stop
+	y2 = $odoy
+
+% Back up, turn, find new branch, and drive through boxed gate
+
+	dist = y2 - y1
+	fwd dist @v cruise
+	stop
+
+	turn -90 @v turnSpeed
+	stop
+
+	drive @v cruise : ($crossingblackline)
+	stop
+
+	fwd distFromWheelsToLineSensors @v warp
+	stop
+
+	turn 90 @v turnSpeed
+	stop
+
+	followline "bm" @v cruise : ($crossingblackline)
+	stop
+
+	fwd distFromWheelsToLineSensors @v warp 
+	stop
+
+	followline "bm" @v cruise : ($crossingblackline)
+	stop
+
+	fwd distFromWheelsToLineSensors @v warp 
+	stop
+
+% Find "loose" gate, drive through it, and stop at wall
+
+	followline "bm" @v cruise : ($drivendist > 0.82)  % todo: fix magic number?
+	stop
+
+	%followline "bm" @v crawl : ($irdistright < 0.8*IRSensorInfinityReading)  % todo: fix magic number?
+	%stop
+	%wait 5
+	
+	%dist = distFromWheelsToLineSensors + gateWidth/2
+	%fwd dist @v warp
+	%stop
+	%wait 5
+
+	turn -95 @v turnSpeed
+	stop
+
+	drive @v warp : ($irdistfrontmiddle < SMRsideLength) % todo: fix magic number
+	stop
+
+% Loop around wall
+	
+	turn 90 @v turnSpeed
+
+	wallDist = $irdistright
+	followwall "r" wallDist @v cruise: ($irdistright > 0.8*IRSensorInfinityReading)
+	drive @v cruise: ($crossingblackline)
+	fwd distFromWheelsToLineSensors @v warp
+
+	turn -90 @v turnSpeed
+
+	dist = 2*wallDist
+	followline "bm" @v warp: ($drivendist > dist) % todo: fix magic number
+	fwd distFromWheelsToLineSensors @v warp
+
+	turn -90 @v turnSpeed
+	fwd distFromWheelsToLineSensors @v warp
+
+	wallDist = $irdistright
+	followwall "r" wallDist @v cruise: ($irdistright > 0.8*IRSensorInfinityReading)
+
+	dist = distFromWheelsToLineSensors + gateWidth/2 - 0.025 % todo: fix magic number
+	fwd dist @v warp
+
+	turn -90 @v turnSpeed
+
+	dist =  2*wallDist + 0.75*SMRsideLength
+	fwd dist @v warp
+
+	turn -90 @v turnSpeed
+
+	fwd distFromWheelsToLineSensors @v warp
+
+	wallDist = $irdistright
+	followwall "r" wallDist @v cruise: ($irdistright > 0.8*IRSensorInfinityReading)
+	drive @v cruise: ($crossingblackline)
+	fwd distFromWheelsToLineSensors @v warp
+
+	turn -90 @v turnSpeed
+
+% Follow black line, turn to white line, and then follow it until its end
+
+	followline "bm" @v cruise: ($crossingblackline)
+	fwd distFromWheelsToLineSensors @v warp
+
+	turn 90 @v turnSpeed
+
+	dist = 0.25 % todo: fix magic number
+	fwd dist @v warp
+	y0 = $odoy
+	t0 = $time
+	eval t0
+    
+	followline "wm" @v cruise : (y0 - $odoy > 1.8) | ($cmdtime > 13) % todo: fix magic number
+	stop
+	wait 10
+
+	turn 10
+	stop
+
+% Find next line and drive to garage
+
+	drive @v cruise : ($crossingblackline)
+	fwd distFromWheelsToLineSensors @v warp
+
+	turn 90 @v turnSpeed
+
+	followline "bm" @v cruise: ($irdistfrontmiddle < stopDistFromObjects)
+	delX = 0
+
+	turn 90 @v turnSpeed
+
+	sideGap = 0.05
+	dist = garageWidth/2 + SMRsideLength + garageDoorOverhang/2 + sideGap % todo: fix magic number
+	fwd dist @v cruise
+	delX = delX + dist
+	
+	turn -90 @v turnSpeed
+
+	dist = distFromWheelsToLineSensors + stopDistFromObjects + garageLength*0.75
+	fwd dist @v cruise
+
+	turn 90 @v turnSpeed
+
+	dist = -(0.75*garageDoorOverhang + sideGap) % todo: fix magic number
+	fwd dist @v cruise
+	delX = delX + dist
+
+	turn 90 @v turnSpeed
+
+	dist = stopDistFromObjects/2 + garageLength*0.25 + 0.05
+	ignoreobstacles
+	fwd dist @v cruise
+
+	radius = delX
+	ignoreobstacles
+	turnr radius 90 @v turnSpeed
+
+	turn -90 @v turnSpeed
+
+	dist = -(garageLength + 0.25*SMRsideLength) % todo: fix magic number
+	fwd dist @v warp
+	stop
+
+
+
+
+
